@@ -51,7 +51,7 @@ class Flight {
         this.currentLocation = currentLocation;
         availableSeats = new ArrayList<>();
 
-        // Generate seat map: Rows 1–30, seats A–F
+        // Generates the seat map: Rows 1–30, seats A–F
         char[] seatLetters = {'A', 'B', 'C', 'D', 'E', 'F'};
         for (int row = 1; row <= 30; row++) {
             for (char letter : seatLetters) {
@@ -89,7 +89,7 @@ class Flight {
         return availableSeats;
     }
 
-    // Setters / actions
+    // Setter methods
     public void flightPicked(String flightNumber) {
         this.flightNumber = flightNumber;
     }
@@ -111,4 +111,20 @@ class Flight {
         this.bagNumber = bagNumber;
         this.bagWeight = weight;
     }
+}
+class FlightOptions {
+   public static void showAvailableFlights() {
+       System.out.println("\n--- Available Flights from Nairobi to Johannesburg ---");
+       System.out.println("1. SA220 - Departure: 08:30 AM - Arrival: 11:45 AM");
+       System.out.println("2. KQ101 - Departure: 01:00 PM - Arrival: 04:15 PM");
+       System.out.println("3. ET345 - Departure: 07:20 PM - Arrival: 10:35 PM");
+   }
+
+   public static String[] getFlightList() {
+       return new String[] {
+           "SA220 - 08:30 AM - 11:45 AM",
+           "KQ101 - 01:00 PM - 04:15 PM",
+           "ET345 - 07:20 PM - 10:35 PM"
+       };
+   }
 }
