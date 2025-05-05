@@ -21,6 +21,85 @@ class User{
  public String userVisa(){
     return userVisa;
  }
+
+    //part two
+    import java.util.ArrayList;
+import java.util.List;
+
+class Flight {
+    
+    private String flightNumber;
+    private String seatNumber;
+    private String arrivalLocation;
+    private String currentLocation;
+    private String bagNumber;
+    private double bagWeight;
+
+        private List<String> availableSeats;
+
+    public Flight(String currentLocation) {
+        this.currentLocation = currentLocation;
+        availableSeats = new ArrayList<>();
+
+        char[] seatLetters = {'A', 'B', 'C', 'D', 'E', 'F'};
+        for (int row = 1; row <= 30; row++) {
+            for (char letter : seatLetters) {
+                availableSeats.add(row + String.valueOf(letter));
+            }
+        }
+    }
+
+    public String flightNumber() {
+        return flightNumber;
+    }
+
+    public String seatNumber() {
+        return seatNumber;
+    }
+
+    public String arrivalLocation() {
+        return arrivalLocation;
+    }
+
+    public String currentLocation() {
+        return currentLocation;
+    }
+
+    public String bagNumber() {
+        return bagNumber;
+    }
+
+    public double bagWeight() {
+        return bagWeight;
+    }
+
+    public List<String> availableSeats() {
+        return availableSeats;
+    }
+
+    public void flightPicked(String flightNumber) {
+        this.flightNumber = flightNumber;
+    }
+
+    public void seatBooking(String seatNumber) {
+        if (availableSeats.contains(seatNumber)) {
+            this.seatNumber = seatNumber;
+            availableSeats.remove(seatNumber);
+        } else {
+            System.out.println("Seat " + seatNumber + " is not available.");
+        }
+    }
+
+    public void arrivalLocation(String destination) {
+        this.arrivalLocation = destination;
+    }
+
+    public void baggageInfo(String bagNumber, double weight) {
+        this.bagNumber = bagNumber;
+        this.bagWeight = weight;
+    }
+}
+
  public String userPassport(){
     return userPassport;
  }
