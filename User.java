@@ -111,6 +111,24 @@ class Flight {
         this.bagNumber = bagNumber;
         this.bagWeight = weight;
     }
+
+    public String getBaggageInfo() {
+        return "Baggage Number: " + bagNumber + ", Weight: " + bagWeight + " kg";
+        
+    }
+
+    // public String getMealPreference() {}
+
+       
+
+//    public char[] getFlightInfo() {
+//         char[] flightInfo = new char[flightNumber.length()];
+//         for (int i = 0; i < flightNumber.length(); i++) {
+//             flightInfo[i] = flightNumber.charAt(i);
+//         }
+//         return flightInfo;
+       
+//     }
 }
 class FlightOptions {
    public static void showAvailableFlights() {
@@ -127,4 +145,26 @@ class FlightOptions {
            "ET345 - 07:20 PM - 10:35 PM"
        };
    }
+}
+//// Part 4: Integration of User and Flight into Traveller Class (Assigned to Person C)
+class Traveller {
+    private User user;
+    private Flight flight;
+
+    public Traveller(User user, Flight flight) {
+        this.user = user;
+        this.flight = flight;
+    }
+
+    public void displayFullBookingInfo() {
+        System.out.println("--- Traveller Details ---");
+        System.out.println("Name: " + user.userName());
+        System.out.println("DOB: " + user.userDOB());
+        System.out.println("Passport: " + user.userPassport());
+        System.out.println("Visa: " + user.userVisa());
+        System.out.println("Current Location: " + flight.currentLocation());
+        // System.out.println(flight.getFlightInfo());
+         System.out.println("Baggage: " + flight.getBaggageInfo());
+        //  System.out.println("Meal Preference: " + flight.getMealPreference());
+    }
 }
