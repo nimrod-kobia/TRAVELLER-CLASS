@@ -1,33 +1,42 @@
-class User{
-    //user details
+import java.util.ArrayList;
+import java.util.List;
+
+// Part 1: User Class
+class User {
+    // User details
     private String userName;
     private String userDOB;
     private String userVisa;
     private String userPassport;
-    //constructor to initialize user details
-    public User(String userName, String userDoB, String userVisa, String userPassport){
+
+    // Constructor to initialize user details
+    public User(String userName, String userDOB, String userVisa, String userPassport) {
         this.userName = userName;
-        this.userDOB = userDoB;
+        this.userDOB = userDOB;
         this.userVisa = userVisa;
         this.userPassport = userPassport;
     }
-//getter methods to return users information
- public String userName(){
-    return userName;
- }
- public String userDOB(){
-    return userDOB;
- }
- public String userVisa(){
-    return userVisa;
- }
 
-    //part two
-    import java.util.ArrayList;
-import java.util.List;
+    // Getter methods to return user's information
+    public String userName() {
+        return userName;
+    }
 
+    public String userDOB() {
+        return userDOB;
+    }
+
+    public String userVisa() {
+        return userVisa;
+    }
+
+    public String userPassport() {
+        return userPassport;
+    }
+}
+
+// Part 2: Flight Class
 class Flight {
-    
     private String flightNumber;
     private String seatNumber;
     private String arrivalLocation;
@@ -35,12 +44,14 @@ class Flight {
     private String bagNumber;
     private double bagWeight;
 
-        private List<String> availableSeats;
+    private List<String> availableSeats;
 
+    // Constructor initializes current location and generates seat list
     public Flight(String currentLocation) {
         this.currentLocation = currentLocation;
         availableSeats = new ArrayList<>();
 
+        // Generate seat map: Rows 1–30, seats A–F
         char[] seatLetters = {'A', 'B', 'C', 'D', 'E', 'F'};
         for (int row = 1; row <= 30; row++) {
             for (char letter : seatLetters) {
@@ -49,6 +60,7 @@ class Flight {
         }
     }
 
+    // Getter methods
     public String flightNumber() {
         return flightNumber;
     }
@@ -77,6 +89,7 @@ class Flight {
         return availableSeats;
     }
 
+    // Setters / actions
     public void flightPicked(String flightNumber) {
         this.flightNumber = flightNumber;
     }
@@ -98,9 +111,4 @@ class Flight {
         this.bagNumber = bagNumber;
         this.bagWeight = weight;
     }
-}
-
- public String userPassport(){
-    return userPassport;
- }
 }
