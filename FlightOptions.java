@@ -1,0 +1,54 @@
+import java.util.*;
+
+public class FlightOptions {
+    private List<Flight> flights;
+
+    public FlightOptions() {
+        flights = new ArrayList<>();
+        loadFlightsFromDatabase(); // Simulate loading from DB
+    }
+
+    private void loadFlightsFromDatabase() {
+        // Simulating a database
+        flights.add(new Flight("SA101", "Cape Town", 120.50));
+        flights.add(new Flight("SA202", "Durban", 99.99));
+        flights.add(new Flight("SA303", "Johannesburg", 150.75));
+        flights.add(new Flight("SA404", "Port Elizabeth", 80.00));
+    }
+
+    public void displayAllFlights() {
+        System.out.println("Available Flights:");
+        for (Flight flight : flights) {
+            flight.displayInfo();
+        }
+    }
+
+    public Flight selectFlight(String flightNumber) {
+        for (Flight flight : flights) {
+            if (flight.getFlightNumber().equalsIgnoreCase(flightNumber)) {
+                return flight;
+            }
+        }
+        System.out.println("Flight with number " + flightNumber + " not found.");
+        return null;
+    }
+
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        FlightOptions flightOptions = new FlightOptions();
+
+        flightOptions.displayAllFlights();
+
+        System.out.print("\nEnter the flight number you want to select: ");
+        String inputFlightNumber = scanner.nextLine();
+
+        Flight selectedFlight = flightOptions.selectFlight(inputFlightNumber);
+
+        if (selectedFlight != null) {
+            System.out.println("\nYou have selected:");
+            selectedFlight.displayInfo();
+        }
+
+        scanner.close();
+    }
+}
