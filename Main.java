@@ -38,41 +38,48 @@ abstract class Person {
     protected String name;
     protected String dob;
     protected String nationality;
-    protected String email;
 
-    public Person(String name, String dob, String nationality, String email) {
+    public Person(String name, String dob, String nationality) {
         this.name = name;
         this.dob = dob;
         this.nationality = nationality;
-        this.email = email;
     }
 
-    public String getName() {
-        return name;
-    }
-
-    public String getDOB() {
-        return dob;
-    }
-
-    public String getNationality() {
-        return nationality;
-    }
-
-    public String getEmail() {
-        return email;
-    }
+    public abstract String getName();
+    public abstract String getDOB();
+    public abstract String getNationality();
 }
 
 // User class extending Person and using composition for Passport and Visa
 class User extends Person {
     private Passport passport;
     private Visa visa;
+    private String email;
 
-    public User(String name, String dob, String nationality, String email, Passport passport, Visa visa) {
-        super(name, dob, nationality, email);
+    public User(String name, String dob, String nationality, Passport passport, Visa visa, String email) {
+        super(name, dob, nationality);
         this.passport = passport;
         this.visa = visa;
+        this.email = email;
+    }
+
+    @Override
+    public String getName() {
+        return name;
+    }
+
+    @Override
+    public String getNationality() {
+        return nationality;
+    }
+
+    @Override
+    public String getDOB() {
+        return dob;
+    }
+    
+    public String getEmail() {
+        return email;
     }
 
     public String getPassportNumber() {
@@ -88,9 +95,9 @@ class User extends Person {
         System.out.println("Name: " + getName());
         System.out.println("Date of Birth: " + getDOB());
         System.out.println("Nationality: " + getNationality());
-        System.out.println("Email: " + getEmail());
         System.out.println("Passport: " + getPassportNumber());
         System.out.println("Visa: " + getVisaNumber());
+        System.out.println("Email: " + getEmail());
     }
 }
 
@@ -99,6 +106,7 @@ public class Main {
     public static void main(String[] args) {
         Scanner scanner = new Scanner(System.in);
 
+        // Collect user information
         System.out.print("Enter your name: ");
         String name = scanner.nextLine();
 
@@ -108,21 +116,21 @@ public class Main {
         System.out.print("Enter your nationality: ");
         String nationality = scanner.nextLine();
 
-        System.out.print("Enter your email: ");
-        String email = scanner.nextLine();
-
         System.out.print("Enter your passport number: ");
         String passportNumber = scanner.nextLine();
 
         System.out.print("Enter your visa number: ");
         String visaNumber = scanner.nextLine();
 
+        System.out.print("Enter your email: ");
+        String email = scanner.nextLine();
+
         // Create Passport and Visa objects
         Passport passport = new Passport(passportNumber);
         Visa visa = new Visa(visaNumber);
 
         // Create a User object
-        User user = new User(name, dob, nationality, email, passport, visa);
+        User user = new User(name, dob, nationality, passport, visa, email);
 
         // Display user information
         user.displayUserInfo();
