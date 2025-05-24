@@ -2,11 +2,7 @@
 //all this are methods of payment that can use inheritance or interface to make it more flexible
 //this will be updated to the database that has payment_id,booking_id,amount,payment_method,payment_date
 
-import java.util.*;
-import java.text.*;
-import java.sql.*;
 import java.sql.Date;
-import java.io.*;
 
 
 

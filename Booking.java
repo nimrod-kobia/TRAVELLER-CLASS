@@ -3,7 +3,7 @@ import java.time.LocalDateTime;
 public class Booking {
     private static int idCounter = 1;
 
-    private int bookingId;
+    private int BookingId;
     private User passenger;
     private String flightId;
     private String seatId;
@@ -13,7 +13,7 @@ public class Booking {
     private String paymentStatus;
 
     public Booking(User passenger, String flightId, String seatId, double totalPrice) {
-        this.bookingId = idCounter++;
+        this.BookingId = idCounter++;
         this.passenger = passenger;
         this.flightId = flightId;
         this.seatId = seatId;
@@ -24,7 +24,7 @@ public class Booking {
     }
 
     public int getBookingId() {
-        return bookingId;
+        return BookingId;
     }
 
     public User getPassenger() {
@@ -65,7 +65,7 @@ public class Booking {
 
     public void displayBookingDetails() {
         System.out.println("\nBooking Details:");
-        System.out.println("Booking ID: " + bookingId);
+        System.out.println("Booking ID: " + BookingId);
         System.out.println("Passenger: " + passenger.getName());
         System.out.println("Flight ID: " + flightId);
         System.out.println("Seat ID: " + seatId);
