@@ -85,13 +85,25 @@ class Airport {
 // User class
 class User {
     private String name;
+    private String email;
+    private String phoneNumber;
 
-    public User(String name) {
+    public User(String name, String email, String phoneNumber) {
         this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
     }
 
     public String getName() {
         return name;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getPhoneNumber() {
+        return phoneNumber;
     }
 }
 
@@ -119,6 +131,8 @@ class Booking {
         System.out.println("\nBooking Details:");
         System.out.println("Booking ID: " + bookingId);
         System.out.println("Passenger: " + passenger.getName());
+        System.out.println("Email: " + passenger.getEmail());
+        System.out.println("Phone: " + passenger.getPhoneNumber());
         System.out.println("Flight ID: " + flightId);
         System.out.println("Seat ID: " + seatId);
         System.out.println("Booking Time: " + bookingTime);
@@ -139,7 +153,6 @@ class Flight {
     private Set<String> bookedSeats = new HashSet<>();
     private static final int MAX_ROWS = 14;
     private static final char[] SEAT_LETTERS = {'A', 'B', 'C', 'D', 'E', 'F'};
-    private Random random = new Random();
 
     public Flight(String flightNumber, String arrivalLocation, double price) {
         this.flightNumber = flightNumber;
@@ -147,20 +160,25 @@ class Flight {
         this.price = price;
     }
 
-    public String seatBooking() {
-        if (bookedSeats.size() >= MAX_ROWS * SEAT_LETTERS.length) return null;
-        String seat;
-        do {
-            int row = random.nextInt(MAX_ROWS) + 1;
-            char letter = SEAT_LETTERS[random.nextInt(SEAT_LETTERS.length)];
-            seat = row + String.valueOf(letter);
-        } while (bookedSeats.contains(seat));
-        bookedSeats.add(seat);
-        return seat;
-    }
-
     public void displayInfo() {
         System.out.println("Flight: " + flightNumber + " to " + arrivalLocation + " - Price: $" + price);
+    }
+
+    public void displayAvailableSeats() {
+        System.out.println("Available Seats:");
+        for (int row = 1; row <= MAX_ROWS; row++) {
+            for (char letter : SEAT_LETTERS) {
+                String seat = row + String.valueOf(letter);
+                if (!bookedSeats.contains(seat)) System.out.print(seat + " ");
+            }
+            System.out.println();
+        }
+    }
+
+    public boolean bookSeat(String seatId) {
+        if (bookedSeats.contains(seatId)) return false;
+        bookedSeats.add(seatId);
+        return true;
     }
 
     public String getFlightNumber() {
@@ -172,39 +190,16 @@ class Flight {
     }
 }
 
-// FlightSeat class
-class FlightSeat {
-    private String seatNumber, seatClass;
-    private boolean isBooked;
-    private double price;
-
-    public FlightSeat(String seatNumber, String seatClass, double price) {
-        this.seatNumber = seatNumber;
-        this.seatClass = seatClass;
-        this.price = price;
-        this.isBooked = false;
-    }
-
-    public boolean bookSeat() {
-        if (!isBooked) {
-            isBooked = true;
-            return true;
-        }
-        return false;
-    }
-
-    public void displaySeatInfo() {
-        System.out.println("Seat: " + seatNumber + " | Class: " + seatClass + " | Price: $" + price + " | Status: " + (isBooked ? "Booked" : "Available"));
-    }
-}
-
 // Payments classes
 class Payments {
     private double amount;
     private String paymentMethod;
+    private Date paymentDate;
+
     public Payments(int paymentId, int bookingId, double amount, String paymentMethod, Date paymentDate) {
         this.amount = amount;
         this.paymentMethod = paymentMethod;
+        this.paymentDate = paymentDate;
     }
 
     public boolean validatePaymentDetails() {
@@ -225,26 +220,50 @@ class CashPayment extends Payments {
 // Main launcher class
 public class PlaneBookingSystem {
     public static void main(String[] args) {
-        Aircraft aircraft = new Aircraft("N12345", "737 MAX", "Boeing", 180, 79015, 6570.0, 2020);
-        System.out.println(aircraft);
+        Scanner scanner = new Scanner(System.in);
 
-        Airlines airline = new Airlines(1, "Kenya Airways", "KQ", "Nairobi", "+254700000000", "www.kenya-airways.com");
-        System.out.println(airline.getAirlineDetails());
+        System.out.println("Welcome to the Plane Booking System\nPlease enter your details to proceed.");
+        System.out.print("Enter full name: ");
+        String name = scanner.nextLine();
 
-        Airport airport = new Airport("Jomo Kenyatta International", "NBO", "HKJK", "Nairobi", "Kenya", 2, 3, -1.3192, 36.9275);
-        airport.addFlight("KQ101");
-        System.out.println(airport);
-        System.out.println("Flights: " + airport.getFlights());
+        System.out.print("Enter email: ");
+        String email = scanner.nextLine();
 
-        User user = new User("John Doe");
-        Flight flight = new Flight("SA101", "Cape Town", 120.50);
-        flight.displayInfo();
-        String seat = flight.seatBooking();
+        System.out.print("Enter phone number: ");
+        String phoneNumber = scanner.nextLine();
 
-        Booking booking = new Booking(user, flight.getFlightNumber(), seat, flight.getPrice());
+        User user = new User(name, email, phoneNumber);
+
+        List<Flight> flights = Arrays.asList(
+            new Flight("SA101", "Cape Town", 120.50),
+            new Flight("KQ202", "Nairobi", 90.00),
+            new Flight("ET303", "Addis Ababa", 110.75)
+        );
+
+        System.out.println("\nAvailable Flights:");
+        for (int i = 0; i < flights.size(); i++) {
+            System.out.print((i + 1) + ". ");
+            flights.get(i).displayInfo();
+        }
+
+        System.out.print("\nSelect a flight (1-3): ");
+        int choice = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        Flight selectedFlight = flights.get(choice - 1);
+
+        selectedFlight.displayAvailableSeats();
+        System.out.print("\nSelect your seat (e.g., 3C): ");
+        String selectedSeat = scanner.nextLine().toUpperCase();
+
+        while (!selectedFlight.bookSeat(selectedSeat)) {
+            System.out.print("Seat already booked or invalid. Choose another seat: ");
+            selectedSeat = scanner.nextLine().toUpperCase();
+        }
+
+        Booking booking = new Booking(user, selectedFlight.getFlightNumber(), selectedSeat, selectedFlight.getPrice());
         booking.displayBookingDetails();
 
-        Payments payment = new CashPayment(1, booking.getBookingId(), flight.getPrice(), new Date(System.currentTimeMillis()));
+        Payments payment = new CashPayment(1, booking.getBookingId(), selectedFlight.getPrice(), new Date(System.currentTimeMillis()));
         if (payment.validatePaymentDetails()) payment.processPayment();
         else System.out.println("Payment validation failed.");
     }
