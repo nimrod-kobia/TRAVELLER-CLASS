@@ -1,27 +1,25 @@
-import java.util.Scanner;
-
 // Interface for identification entities
+// This shows ABSTRACTION by defining a common behavior (getID) without implementation.
 interface Identification {
-    String getID();
+    String getID(); // Abstract method to be implemented by specific ID types like Passport and Visa
 }
-
-// Class implementing Identifiable interface for Passport
+// class uses encapsulation: passportNumber is private and accessed via getID() method
 class Passport implements Identification {
-    private String passportNumber;
+    private String passportNumber; // Encapsulated data
 
     public Passport(String passportNumber) {
         this.passportNumber = passportNumber;
     }
 
+    // Implementation of abstract method from Identification interface
     @Override
     public String getID() {
         return passportNumber;
     }
-}
 
-// Class implementing Identifiable interface for Visa
+// Demonstrates POLYMORPHISM: same interface method (getID) is used differently for Visa
 class Visa implements Identification {
-    private String visaNumber;
+    private String visaNumber; // Encapsulated data
 
     public Visa(String visaNumber) {
         this.visaNumber = visaNumber;
@@ -32,37 +30,39 @@ class Visa implements Identification {
         return visaNumber;
     }
 }
-
-// Abstract class Person with common attributes
+// Abstract class Person with common attributes to be inherited by user class
+// class shows abstraction and inheritance
 abstract class Person {
     protected String name;
     protected String dob;
     protected String nationality;
 
+    // Constructor to initialize common attributes
     public Person(String name, String dob, String nationality) {
         this.name = name;
         this.dob = dob;
         this.nationality = nationality;
     }
 
+    // Abstract methods to be implemented by subclasses (e.g., User)
     public abstract String getName();
     public abstract String getDOB();
     public abstract String getNationality();
-}
 
-// User class extending Person and using composition for Passport and Visa
-class User extends Person {
-    private Passport passport;
-    private Visa visa;
-    private String email;
+//class shows inheritance and composition
+class User extends Person { //User "is a" person
+    private Passport passport; // COMPOSITION: User "has a" Passport
+    private Visa visa;       
+    private String email; 
 
     public User(String name, String dob, String nationality, Passport passport, Visa visa, String email) {
-        super(name, dob, nationality);
+        super(name, dob, nationality); // Calling the superclass constructor
         this.passport = passport;
         this.visa = visa;
         this.email = email;
     }
 
+    // Implementing abstract methods from Person
     @Override
     public String getName() {
         return name;
@@ -78,10 +78,12 @@ class User extends Person {
         return dob;
     }
 
+    // Getter for email
     public String getEmail() {
         return email;
     }
 
+    // Using polymorphism
     public String getPassportNumber() {
         return passport.getID();
     }
@@ -90,6 +92,7 @@ class User extends Person {
         return visa.getID();
     }
 
+    // Display method to show user info
     public void displayUserInfo() {
         System.out.println("\nUser Information:");
         System.out.println("Name: " + getName());
@@ -100,34 +103,6 @@ class User extends Person {
         System.out.println("Email: " + getEmail());
     }
 
-    // Main method to collect user input and create a User
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-
-        System.out.print("Enter name: ");
-        String name = in.nextLine();
-
-        System.out.print("Enter date of birth (YYYY-MM-DD): ");
-        String dob = in.nextLine();
-
-        System.out.print("Enter nationality: ");
-        String nationality = in.nextLine();
-
-        System.out.print("Enter passport number: ");
-        String passportNumber = in.nextLine();
-
-        System.out.print("Enter visa number: ");
-        String visaNumber = in.nextLine();
-
-        System.out.print("Enter email: ");
-        String email = in.nextLine();
-
-        Passport passport = new Passport(passportNumber);
-        Visa visa = new Visa(visaNumber);
-        User user = new User(name, dob, nationality, passport, visa, email);
-
-        user.displayUserInfo();
-
-        in.close();
-    }
+}
+}
 }
