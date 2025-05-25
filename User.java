@@ -1,12 +1,12 @@
+import java.util.Scanner;
 
-
-// Interface for identifiable entities
-interface Identifiable {
+// Interface for identification entities
+interface Identification {
     String getID();
 }
 
 // Class implementing Identifiable interface for Passport
-class Passport implements Identifiable {
+class Passport implements Identification {
     private String passportNumber;
 
     public Passport(String passportNumber) {
@@ -20,7 +20,7 @@ class Passport implements Identifiable {
 }
 
 // Class implementing Identifiable interface for Visa
-class Visa implements Identifiable {
+class Visa implements Identification {
     private String visaNumber;
 
     public Visa(String visaNumber) {
@@ -77,7 +77,7 @@ class User extends Person {
     public String getDOB() {
         return dob;
     }
-    
+
     public String getEmail() {
         return email;
     }
@@ -99,6 +99,35 @@ class User extends Person {
         System.out.println("Visa: " + getVisaNumber());
         System.out.println("Email: " + getEmail());
     }
+
+    // Main method to collect user input and create a User
+    public static void main(String[] args) {
+        Scanner in = new Scanner(System.in);
+
+        System.out.print("Enter name: ");
+        String name = in.nextLine();
+
+        System.out.print("Enter date of birth (YYYY-MM-DD): ");
+        String dob = in.nextLine();
+
+        System.out.print("Enter nationality: ");
+        String nationality = in.nextLine();
+
+        System.out.print("Enter passport number: ");
+        String passportNumber = in.nextLine();
+
+        System.out.print("Enter visa number: ");
+        String visaNumber = in.nextLine();
+
+        System.out.print("Enter email: ");
+        String email = in.nextLine();
+
+        Passport passport = new Passport(passportNumber);
+        Visa visa = new Visa(visaNumber);
+        User user = new User(name, dob, nationality, passport, visa, email);
+
+        user.displayUserInfo();
+
+        in.close();
+    }
 }
-
-

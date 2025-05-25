@@ -4,10 +4,6 @@
 
 import java.sql.Date;
 
-
-
-
-
 public class payments {
     private int paymentId;
     private int bookingId;

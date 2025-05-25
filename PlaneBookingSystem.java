@@ -302,8 +302,8 @@ public class PlaneBookingSystem {
 
     // Admin Portal
     private static void runAdminPortal(Scanner scanner) {
-        // Brian: Admin main menu.
-        System.out.println("\n--- Admin Portal ---");
+        //Admin main menu.
+        System.out.println("\nAdmin Portal");
         boolean adminRunning = true;
         while (adminRunning) {
             System.out.println("\nAdmin Menu:\n1. Add New Airport\n2. View All Airports\n3. Add New Aircraft\n4. View All Aircraft\n5. Add New Flight (Future Feature)\n6. Back to Main Menu"); // Brian: Airport/Aircraft mgt. Sean: Future flight def.
@@ -321,9 +321,9 @@ public class PlaneBookingSystem {
         }
     }
 
-    // Brian: Admin inputs new airport details.
+    //Admin inputs new airport details.
     private static void addAirport(Scanner scanner) {
-        System.out.println("\n--- Add New Airport ---");
+        System.out.println("\nAdd New Airport");
         try {
             System.out.print("Enter airport name: "); String name = scanner.nextLine();
             System.out.print("Enter IATA code: "); String iata = scanner.nextLine();
@@ -342,15 +342,15 @@ public class PlaneBookingSystem {
 
     // Brian: Displays registered airports. (GUI: sortable table/map).
     private static void viewAirports() {
-        System.out.println("\n--- Registered Airports ---");
+        System.out.println("\nRegistered Airports");
         if (airportNetwork.isEmpty()) { System.out.println("No airports added yet."); return; }
         for (int i = 0; i < airportNetwork.size(); i++) System.out.println("\nAirport #" + (i + 1) + "\n" + airportNetwork.get(i));
-        System.out.println("-------------------------");
+        
     }
 
     // Brian: Admin inputs new aircraft details. (GUI: dropdowns, validation).
     private static void addAircraft(Scanner scanner) {
-        System.out.println("\n--- Add New Aircraft ---");
+        System.out.println("\nAdd New Aircraft");
         try {
             System.out.print("Enter registration number: "); String reg = scanner.nextLine();
             System.out.print("Enter model: "); String model = scanner.nextLine();
@@ -365,9 +365,9 @@ public class PlaneBookingSystem {
           catch (Exception e) { System.out.println("An error occurred: " + e.getMessage()); }
     }
 
-    // Brian: Displays registered aircraft. (GUI: list with icons).
+    // Displays registered aircraft
     private static void viewAircraft() {
-        System.out.println("\n--- Registered Aircraft Fleet ---");
+        System.out.println("\nRegistered Aircraft Fleet");
         if (aircraftFleet.isEmpty()) { System.out.println("No aircraft added yet."); return; }
         for (int i = 0; i < aircraftFleet.size(); i++) System.out.println("\nAircraft #" + (i + 1) + "\n" + aircraftFleet.get(i));
         System.out.println("-------------------------------");
@@ -375,7 +375,7 @@ public class PlaneBookingSystem {
 
     // User Portal for flight booking
     private static void runUserPortal(Scanner scanner) {
-        System.out.println("\n--- User Portal: Book a Flight ---");
+        System.out.println("\n User Portal: Book a Flight");
         // Nimrod: Collect passenger details for User object.
         System.out.println("Please enter your details to proceed.");
         System.out.print("Enter full name: "); String name = scanner.nextLine();
@@ -401,7 +401,7 @@ public class PlaneBookingSystem {
         }
 
         // Sean: Display seat map & handle seat selection.
-        System.out.println("\n--- Seat Selection for Flight " + selectedFlight.getFlightNumber() + " to " + selectedFlight.getArrivalLocation() + " ---");
+        System.out.println("\nSeat Selection for Flight " + selectedFlight.getFlightNumber() + " to " + selectedFlight.getArrivalLocation());
         selectedFlight.displayAvailableSeats();
         String selectedSeat; boolean seatBooked = false;
         while (!seatBooked) {
@@ -414,7 +414,7 @@ public class PlaneBookingSystem {
         Booking booking = new Booking(user, selectedFlight.getFlightNumber(), scanner.nextLine().trim().toUpperCase(), selectedFlight.getPrice()); // Re-prompt for selectedSeat as it's local to loop. Better fix: use the `selectedSeat` from loop.
        
         // Louis: Handle payment process. (DB: payment options could be dynamic).
-        System.out.println("\n--- Payment ---");
+        System.out.println("\nPayment");
         System.out.print("Choose payment method: (1) Cash (2) Card: "); String paymentChoice = scanner.nextLine().trim();
         Payments payment;
         if ("1".equals(paymentChoice)) payment = new CashPayment(nextPaymentId++, booking.getBookingId(), booking.getTotalPrice(), new Date(System.currentTimeMillis()));
