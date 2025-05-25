@@ -1,19 +1,20 @@
-import java.util.*;
+import java.util.Scanner;
 
 public class FlightOptions {
-    private List<Flight> flights;
+    private Flight[] flights;
 
     public FlightOptions() {
-        flights = new ArrayList<>();
-        loadFlightsFromDatabase(); // Simulate loading from DB
+        loadFlightsFromDatabase(); // Placeholder for future DB integration
     }
 
     private void loadFlightsFromDatabase() {
-        // Simulating a database
-        flights.add(new Flight("SA101", "Cape Town", 120.50));
-        flights.add(new Flight("SA202", "Durban", 99.99));
-        flights.add(new Flight("SA303", "Johannesburg", 150.75));
-        flights.add(new Flight("SA404", "Port Elizabeth", 80.00));
+        // Simulating a database - you can replace this with actual DB fetch later
+        flights = new Flight[] {
+            new Flight("SA101", "Cape Town", 120.50),
+            new Flight("SA202", "Durban", 99.99),
+            new Flight("SA303", "Johannesburg", 150.75),
+            new Flight("SA404", "Port Elizabeth", 80.00)
+        };
     }
 
     public void displayAllFlights() {
