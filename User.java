@@ -17,7 +17,7 @@ class Passport implements Identification {
         return passportNumber;
     }
 
-// Demonstrates POLYMORPHISM: same interface method (getID) is used differently for Visa
+// POLYMORPHISM: same interface method (getID) is used differently for Visa
 class Visa implements Identification {
     private String visaNumber; // Encapsulated data
 

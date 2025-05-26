@@ -133,7 +133,7 @@ class Booking {
     // Ryan: Displays booking confirmation to the user.
     public void displayBookingDetails() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // Ryan: Readable date format.
-        System.out.println("\n--- Booking Confirmation ---\nBooking ID: " + bookingId +
+        System.out.println("\nBooking Confirmation\nBooking ID: " + bookingId +
                 "\nPassenger: " + passenger.getName() + " (" + passenger.getRoleDescription() + ")" +
                 "\nEmail: " + passenger.getEmail() + "\nPhone: " + passenger.getPhoneNumber() +
                 "\nFlight ID: " + flightId + "\nSeat ID: " + seatId +
