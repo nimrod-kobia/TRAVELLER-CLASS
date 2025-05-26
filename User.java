@@ -1,9 +1,6 @@
 
 
 // Interface for identifiable entities
-
-import java.util.Map;
-
 interface Identifiable {
     String getID();
 }
@@ -16,15 +13,15 @@ class Passport implements Identifiable {
         this.passportNumber = passportNumber;
     }
 
+    // Implementation of abstract method from Identification interface
     @Override
     public String getID() {
         return passportNumber;
     }
-}
 
-// Class implementing Identifiable interface for Visa
-class Visa implements Identifiable {
-    private String visaNumber;
+// Demonstrates POLYMORPHISM: same interface method (getID) is used differently for Visa
+class Visa implements Identification {
+    private String visaNumber; // Encapsulated data
 
     public Visa(String visaNumber) {
         this.visaNumber = visaNumber;
@@ -35,37 +32,39 @@ class Visa implements Identifiable {
         return visaNumber;
     }
 }
-
-// Abstract class Person with common attributes
+// Abstract class Person with common attributes to be inherited by user class
+// class shows abstraction and inheritance
 abstract class Person {
     protected String name;
     protected String dob;
     protected String nationality;
 
+    // Constructor to initialize common attributes
     public Person(String name, String dob, String nationality) {
         this.name = name;
         this.dob = dob;
         this.nationality = nationality;
     }
 
+    // Abstract methods to be implemented by subclasses (e.g., User)
     public abstract String getName();
     public abstract String getDOB();
     public abstract String getNationality();
-}
 
-// User class extending Person and using composition for Passport and Visa
-class User extends Person {
-    private Passport passport;
-    private Visa visa;
-    private String email;
+//class shows inheritance and composition
+class User extends Person { //User "is a" person
+    private Passport passport; // COMPOSITION: User "has a" Passport
+    private Visa visa;       
+    private String email; 
 
     public User(String name, String dob, String nationality, Passport passport, Visa visa, String email) {
-        super(name, dob, nationality);
+        super(name, dob, nationality); // Calling the superclass constructor
         this.passport = passport;
         this.visa = visa;
         this.email = email;
     }
 
+    // Implementing abstract methods from Person
     @Override
     public String getName() {
         return name;
@@ -80,11 +79,13 @@ class User extends Person {
     public String getDOB() {
         return dob;
     }
-    
+
+    // Getter for email
     public String getEmail() {
         return email;
     }
 
+    // Using polymorphism
     public String getPassportNumber() {
         return passport.getID();
     }
@@ -93,6 +94,7 @@ class User extends Person {
         return visa.getID();
     }
 
+    // Display method to show user info
     public void displayUserInfo() {
         System.out.println("\nUser Information:");
         System.out.println("Name: " + getName());
@@ -102,34 +104,6 @@ class User extends Person {
         System.out.println("Visa: " + getVisaNumber());
         System.out.println("Email: " + getEmail());
     }
-
-    public Map<String, String> getAllUserData() {
-        Map<String, String> userData = new java.util.HashMap<>();
-        userData.put("name", getName());
-        userData.put("dob", getDOB());
-        userData.put("nationality", getNationality());
-        userData.put("email", getEmail());
-        userData.put("passport", getPassportNumber());
-        userData.put("visa", getVisaNumber());
-        return userData;
-    }
-
-     public static void main(String[] args) {
-        // Create a new user with all attributes
-        Passport passport = new Passport("AB1234567");
-        Visa visa = new Visa("US20230001");
-        User user = new User("John Doe", "1990-05-15", "American", passport, visa, "john.doe@example.com");
-        
-        // Save complete user to database
-        DatabaseManager.saveUser(user);
-        
-        // Load complete user from database by email
-        User loadedUser = DatabaseManager.loadUser("john.doe@example.com");
-        if (loadedUser != null) {
-            loadedUser.displayUserInfo();
-        }
-        
-        // Or load by ID if you have it
-        // User loadedById = DatabaseManager.loadUser(1);
-    }
 }
+
+

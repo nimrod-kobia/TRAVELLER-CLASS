@@ -1,3 +1,4 @@
+// Independent FlightSeat class
 public class FlightSeat {
     private String seatNumber;
     private String seatClass; // e.g., "Economy", "Business", "First"
@@ -33,6 +34,7 @@ public class FlightSeat {
     public boolean bookSeat() {
         if (!isBooked) {
             isBooked = true;
+            System.out.println("Seat " + seatNumber + " booked successfully.");
             return true;
         } else {
             System.out.println("Seat " + seatNumber + " is already booked.");
@@ -44,7 +46,7 @@ public class FlightSeat {
     public void displaySeatInfo() {
         System.out.println("Seat: " + seatNumber +
                            " | Class: " + seatClass +
-                           " | Price: $" + price +
+                           " | Price: Ksh " + price +
                            " | Status: " + (isBooked ? "Booked" : "Available"));
     }
 }

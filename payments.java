@@ -1,5 +1,6 @@
 import java.sql.Date;
 
+<<<<<<< HEAD
 abstract class Payment {
     protected int paymentId;
     protected String bookingId;
@@ -7,6 +8,17 @@ abstract class Payment {
     protected Date paymentDate;
     
     public Payment(int paymentId, String bookingId, double amount, Date paymentDate) {
+=======
+public class payments {
+    private int paymentId;
+    private int bookingId;
+    private double amount;
+    private String paymentMethod;
+    private Date paymentDate;
+
+    // Constructor
+    public payments(int paymentId, int bookingId, double amount, String paymentMethod, Date paymentDate) {
+>>>>>>> afdb3c432c50f398a5269f4dddc8b6080d46e931
         this.paymentId = paymentId;
         this.bookingId = bookingId;
         this.amount = amount;
