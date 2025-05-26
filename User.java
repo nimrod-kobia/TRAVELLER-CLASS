@@ -20,7 +20,7 @@ class Passport implements Identifiable {
     }
 
 // Demonstrates POLYMORPHISM: same interface method (getID) is used differently for Visa
-class Visa implements Identification {
+class Visa implements Identifiable {
     private String visaNumber; // Encapsulated data
 
     public Visa(String visaNumber) {
@@ -104,6 +104,8 @@ class User extends Person { //User "is a" person
         System.out.println("Visa: " + getVisaNumber());
         System.out.println("Email: " + getEmail());
     }
+}
+}
 }
 
 

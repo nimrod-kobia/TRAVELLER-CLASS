@@ -3,6 +3,8 @@ import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 
+// import Passport.Visa;
+
 // Abstract Person Class
 // Nimrod: Abstract Person: base for entities like User, ensuring common details.
 abstract class Person {
@@ -440,13 +442,13 @@ public class PlaneBookingSystem {
         // Ryan: Create Booking object.
         Booking booking = new Booking(user, selectedFlight.getFlightNumber(), scanner.nextLine().trim().toUpperCase(), selectedFlight.getPrice()); // Re-prompt for selectedSeat as it's local to loop. Better fix: use the `selectedSeat` from loop.
        
-<<<<<<< HEAD
+
         // Louis: Handle payment process. 
         System.out.println("\n--- Payment ---");
-=======
+
         // Louis: Handle payment process. (DB: payment options could be dynamic).
         System.out.println("\nPayment");
->>>>>>> afdb3c432c50f398a5269f4dddc8b6080d46e931
+
         System.out.print("Choose payment method: (1) Cash (2) Card: "); String paymentChoice = scanner.nextLine().trim();
         Payments payment;
         if ("1".equals(paymentChoice)) payment = new CashPayment(nextPaymentId++, booking.getBookingId(), booking.getTotalPrice(), new Date(System.currentTimeMillis()));

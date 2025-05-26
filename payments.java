@@ -1,6 +1,6 @@
 import java.sql.Date;
 
-<<<<<<< HEAD
+
 abstract class Payment {
     protected int paymentId;
     protected String bookingId;
@@ -8,8 +8,8 @@ abstract class Payment {
     protected Date paymentDate;
     
     public Payment(int paymentId, String bookingId, double amount, Date paymentDate) {
-=======
-public class payments {
+    }
+public abstract class payments {
     private int paymentId;
     private int bookingId;
     private double amount;
@@ -18,7 +18,7 @@ public class payments {
 
     // Constructor
     public payments(int paymentId, int bookingId, double amount, String paymentMethod, Date paymentDate) {
->>>>>>> afdb3c432c50f398a5269f4dddc8b6080d46e931
+    
         this.paymentId = paymentId;
         this.bookingId = bookingId;
         this.amount = amount;
@@ -33,7 +33,7 @@ class CashPayment extends Payment {
         super(paymentId, bookingId, amount, paymentDate);
     }
 
-    @Override
+    
     public void processPayment(Booking booking) {
         System.out.println("\nProcessing cash payment...");
         System.out.println("Payment of $" + String.format("%.2f", amount) + 
@@ -56,7 +56,7 @@ class CardPayment extends Payment {
         this.cvv = cvv;
     }
 
-    @Override
+    
     public void processPayment(Booking booking) {
         System.out.println("\nProcessing card payment...");
         if (validatePaymentDetails()) {
@@ -78,4 +78,5 @@ class CardPayment extends Payment {
                expiryDate != null && expiryDate.matches("\\d{2}/\\d{2}") &&
                cvv != null && cvv.matches("\\d{3}");
     }
-}        
+}     
+}   

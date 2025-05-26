@@ -1,7 +1,7 @@
 import java.sql.*;
 
 public class DBHelper {
-    private static final String DB_URL = "jdbc:mysql://localhost:3309/plane_booking";
+    private static final String DB_URL = "jdbc:mysql://localhost:3309/traveller_class";
     private static final String USER = "root";
     private static final String PASS = "12345678";
 

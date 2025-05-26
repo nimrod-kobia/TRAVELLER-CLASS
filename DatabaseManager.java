@@ -1,9 +1,10 @@
 import java.sql.*;
 
+
 public class DatabaseManager {
-    private static final String DB_URL = "jdbc:mysql://localhost:3306/your_database";
-    private static final String USER = "your_username";
-    private static final String PASS = "your_password";
+    private static final String DB_URL = "jdbc:mysql://localhost:3309/traveller_class";
+    private static final String USER = "root";
+    private static final String PASS = "12345678";
 
     // Method to save a complete User to the database
     public static void saveUser(User user) {
