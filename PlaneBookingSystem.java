@@ -158,6 +158,10 @@ class Booking {
         this.totalPrice = totalPrice; this.bookingTime = LocalDateTime.now();
     }
 
+    public Booking(Object passenger2, String flightId2, int seatId2, double totalPrice2) {
+        //TODO Auto-generated constructor stub
+    }
+
     // Ryan: Displays booking confirmation to the user.
     public void displayBookingDetails() {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // Ryan: Readable date format.
@@ -229,7 +233,7 @@ class Flight {
 }
 
 // Payments Superclass
-// Louis: Abstract Payments class: common structure for payment types. (DB: paymentId from sequence).
+// Louis: Abstract Payments class: common structure for payment types. .
 abstract class Payments {
     protected int paymentId, bookingId; // Louis: Links payment to booking.
     protected double amount;
