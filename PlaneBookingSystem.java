@@ -23,9 +23,34 @@ abstract class Person {
 class User extends Person {
     public User(String name, String email, String phoneNumber) { super(name, email, phoneNumber); } // Nimrod: super() calls Person constructor.
 
+    public User(String name, String dob, String nationality, Passport passport, Visa visa, String email) {
+        super(name, email, ""); // Provide phoneNumber as empty or as needed
+        // Additional initialization for dob, nationality, passport, visa can be added here if fields exist
+    }
+
     @Override 
     public String getRoleDescription() { return "Passenger"; }
      // Nimrod: User's role is "Passenger".
+
+    public int getId() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getId'");
+    }
+
+    public String getNationality() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getNationality'");
+    }
+
+    public String getDOB() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getDOB'");
+    }
+
+    public String getVisaNumber() {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getVisaNumber'");
+    }
 }
 
 // Aircraft class 
@@ -123,6 +148,7 @@ class Booking {
     private LocalDateTime bookingTime;
     private double totalPrice;
     private String bookingStatus = "Confirmed", paymentStatus = "Pending"; // Ryan: Initial statuses.
+    
 
     // Ryan: Booking constructor, called after flight/seat selection. (Integrate Baggage later on).
     public Booking(User passenger, String flightId, String seatId, double totalPrice) {
@@ -146,6 +172,7 @@ class Booking {
     public int getBookingId() { return bookingId; } // Ryan: ID for referencing (e.g. in payments).
     public double getTotalPrice() { return totalPrice; } // Ryan: Needed by payment module.
     public void setPaymentStatus(String status) { this.paymentStatus = status; } // Ryan: Allows payment module to update.
+
 }
 
 // Flight class
@@ -413,7 +440,7 @@ public class PlaneBookingSystem {
         // Ryan: Create Booking object.
         Booking booking = new Booking(user, selectedFlight.getFlightNumber(), scanner.nextLine().trim().toUpperCase(), selectedFlight.getPrice()); // Re-prompt for selectedSeat as it's local to loop. Better fix: use the `selectedSeat` from loop.
        
-        // Louis: Handle payment process. (DB: payment options could be dynamic).
+        // Louis: Handle payment process. 
         System.out.println("\n--- Payment ---");
         System.out.print("Choose payment method: (1) Cash (2) Card: "); String paymentChoice = scanner.nextLine().trim();
         Payments payment;
@@ -427,7 +454,8 @@ public class PlaneBookingSystem {
             System.out.println("Invalid choice. Defaulting to Cash.");
             payment = new CashPayment(nextPaymentId++, booking.getBookingId(), booking.getTotalPrice(), new Date(System.currentTimeMillis()));
         }
-        payment.processPayment(booking); // Louis: Process payment & update booking. (DB: Log transaction).
+        payment.processPayment(booking);
+        if ("Paid".equals(booking)) // Louis: Process payment & update booking. (DB: Log transaction).
         
         booking.displayBookingDetails(); // Ryan: Final booking confirmation.
         System.out.println("Thank you for booking with us, " + user.getName() + "!");

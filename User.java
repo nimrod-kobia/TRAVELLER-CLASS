@@ -1,6 +1,9 @@
 
 
 // Interface for identifiable entities
+
+import java.util.Map;
+
 interface Identifiable {
     String getID();
 }
@@ -99,6 +102,34 @@ class User extends Person {
         System.out.println("Visa: " + getVisaNumber());
         System.out.println("Email: " + getEmail());
     }
+
+    public Map<String, String> getAllUserData() {
+        Map<String, String> userData = new java.util.HashMap<>();
+        userData.put("name", getName());
+        userData.put("dob", getDOB());
+        userData.put("nationality", getNationality());
+        userData.put("email", getEmail());
+        userData.put("passport", getPassportNumber());
+        userData.put("visa", getVisaNumber());
+        return userData;
+    }
+
+     public static void main(String[] args) {
+        // Create a new user with all attributes
+        Passport passport = new Passport("AB1234567");
+        Visa visa = new Visa("US20230001");
+        User user = new User("John Doe", "1990-05-15", "American", passport, visa, "john.doe@example.com");
+        
+        // Save complete user to database
+        DatabaseManager.saveUser(user);
+        
+        // Load complete user from database by email
+        User loadedUser = DatabaseManager.loadUser("john.doe@example.com");
+        if (loadedUser != null) {
+            loadedUser.displayUserInfo();
+        }
+        
+        // Or load by ID if you have it
+        // User loadedById = DatabaseManager.loadUser(1);
+    }
 }
-
-
