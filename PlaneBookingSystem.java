@@ -34,25 +34,6 @@ class User extends Person {
     public String getRoleDescription() { return "Passenger"; }
      // Nimrod: User's role is "Passenger".
 
-    public int getId() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getId'");
-    }
-
-    public String getNationality() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getNationality'");
-    }
-
-    public String getDOB() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getDOB'");
-    }
-
-    public String getVisaNumber() {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getVisaNumber'");
-    }
 }
 
 // Aircraft class 
