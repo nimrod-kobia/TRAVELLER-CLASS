@@ -1,28 +1,18 @@
 import java.sql.Date;
 
-
 abstract class Payment {
     protected int paymentId;
     protected String bookingId;
     protected double amount;
     protected Date paymentDate;
+    protected String paymentMethod;  // Added this field
     
-    public Payment(int paymentId, String bookingId, double amount, Date paymentDate) {
-    }
-public abstract class payments {
-    private int paymentId;
-    private int bookingId;
-    private double amount;
-    private String paymentMethod;
-    private Date paymentDate;
-
-    // Constructor
-    public payments(int paymentId, int bookingId, double amount, String paymentMethod, Date paymentDate) {
-    
+    public Payment(int paymentId, String bookingId, double amount, Date paymentDate, String paymentMethod) {
         this.paymentId = paymentId;
         this.bookingId = bookingId;
         this.amount = amount;
         this.paymentDate = paymentDate;
+        this.paymentMethod = paymentMethod;
     }
     
     public abstract void processPayment(Booking booking);
@@ -30,10 +20,10 @@ public abstract class payments {
 
 class CashPayment extends Payment {
     public CashPayment(int paymentId, String bookingId, double amount, Date paymentDate) {
-        super(paymentId, bookingId, amount, paymentDate);
+        super(paymentId, bookingId, amount, paymentDate, "Cash");
     }
 
-    
+    @Override
     public void processPayment(Booking booking) {
         System.out.println("\nProcessing cash payment...");
         System.out.println("Payment of $" + String.format("%.2f", amount) + 
@@ -50,13 +40,13 @@ class CardPayment extends Payment {
 
     public CardPayment(int paymentId, String bookingId, double amount, Date paymentDate, 
                       String cardNumber, String expiryDate, String cvv) {
-        super(paymentId, bookingId, amount, paymentDate);
+        super(paymentId, bookingId, amount, paymentDate, "Card");
         this.cardNumber = cardNumber;
         this.expiryDate = expiryDate;
         this.cvv = cvv;
     }
 
-    
+    @Override
     public void processPayment(Booking booking) {
         System.out.println("\nProcessing card payment...");
         if (validatePaymentDetails()) {
@@ -73,10 +63,8 @@ class CardPayment extends Payment {
     }
 
     private boolean validatePaymentDetails() {
-        // Basic validation - expand as needed
         return cardNumber != null && cardNumber.matches("\\d{16}") &&
                expiryDate != null && expiryDate.matches("\\d{2}/\\d{2}") &&
                cvv != null && cvv.matches("\\d{3}");
     }
-}     
-}   
+}
