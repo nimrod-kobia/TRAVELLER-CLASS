@@ -1,24 +1,27 @@
-// Interface for identification entities
-// This shows ABSTRACTION by defining a common behavior (getID) without implementation.
-interface Identification {
-    String getID(); // Abstract method to be implemented by specific ID types like Passport and Visa
+
+
+// Interface for identifiable entities
+interface Identifiable {
+    String getID();
 }
-// class uses encapsulation: passportNumber is private and accessed via getID() method
-class Passport implements Identification {
-    private String passportNumber; // Encapsulated data
+
+// Class implementing Identifiable interface for Passport
+class Passport implements Identifiable {
+    private String passportNumber;
 
     public Passport(String passportNumber) {
         this.passportNumber = passportNumber;
     }
 
-    // Implementation of abstract method from Identification interface
+    // Implementation of abstract method from Identifiable interface
     @Override
     public String getID() {
         return passportNumber;
     }
+}
 
-// POLYMORPHISM: same interface method (getID) is used differently for Visa
-class Visa implements Identification {
+// Demonstrates POLYMORPHISM: same interface method (getID) is used differently for Visa
+class Visa implements Identifiable {
     private String visaNumber; // Encapsulated data
 
     public Visa(String visaNumber) {
@@ -30,8 +33,9 @@ class Visa implements Identification {
         return visaNumber;
     }
 }
-// Abstract class Person with common attributes to be inherited by user class
-// class shows abstraction and inheritance
+
+// Abstract class Person with common attributes to be inherited by User class
+// Shows abstraction and inheritance
 abstract class Person {
     protected String name;
     protected String dob;
@@ -44,16 +48,17 @@ abstract class Person {
         this.nationality = nationality;
     }
 
-    // Abstract methods to be implemented by subclasses (e.g., User)
+    // Abstract methods to be implemented by subclasses
     public abstract String getName();
     public abstract String getDOB();
     public abstract String getNationality();
+}
 
-//class shows inheritance and composition
-class User extends Person { //User "is a" person
+// Class shows inheritance and composition
+class User extends Person { // User "is a" Person
     private Passport passport; // COMPOSITION: User "has a" Passport
-    private Visa visa;       
-    private String email; 
+    private Visa visa;
+    private String email;
 
     public User(String name, String dob, String nationality, Passport passport, Visa visa, String email) {
         super(name, dob, nationality); // Calling the superclass constructor
@@ -69,13 +74,13 @@ class User extends Person { //User "is a" person
     }
 
     @Override
-    public String getNationality() {
-        return nationality;
+    public String getDOB() {
+        return dob;
     }
 
     @Override
-    public String getDOB() {
-        return dob;
+    public String getNationality() {
+        return nationality;
     }
 
     // Getter for email
@@ -102,7 +107,8 @@ class User extends Person { //User "is a" person
         System.out.println("Visa: " + getVisaNumber());
         System.out.println("Email: " + getEmail());
     }
+}
+}
+}
 
-}
-}
-}
+

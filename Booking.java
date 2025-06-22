@@ -54,6 +54,9 @@ public class Booking {
     public String getPaymentStatus() {
         return paymentStatus;
     }
+      public void setPaymentStatus(String status) {
+        this.paymentStatus = status;
+    }
 
     public void updatePaymentStatus(String status) {
         this.paymentStatus = status;
