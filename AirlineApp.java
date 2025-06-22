@@ -1,13 +1,40 @@
 import java.util.Scanner;
 
-// This interface defines a method without implementation.
-// Any class that implements this must define how to return airline details.
+// --- Interfaces (Abstractions) ---
+
+// S - Single Responsibility Principle (SRP): This interface is solely responsible for defining
+// how to retrieve basic airline information as a formatted string.
 interface AirlineInfo {
-    String getAirlineDetails(); 
+    String getAirlineDetails();
 }
 
-// encapsulation: all fields are private and accessed through public methods.
-// polymorphism: it overrides getAirlineDetails() from the interface.
+// S - Single Responsibility Principle (SRP): This interface is for managing user input.
+// This separates input concerns from the main application logic.
+interface InputHandler {
+    String promptForString(String message);
+    int promptForInt(String message);
+    void close();
+}
+
+// S - Single Responsibility Principle (SRP): This interface is for handling output.
+// This separates output concerns from the main application logic.
+interface OutputHandler {
+    void displayMessage(String message);
+    void displayAirlineInfo(AirlineInfo airline);
+}
+
+// S - Single Responsibility Principle (SRP): This interface is for the core business logic of
+// providing airline data, abstracting how the airline object is created or fetched.
+interface AirlineService {
+    AirlineInfo createAirline(int id, String name, String code, String headquarters, String contact, String website);
+}
+
+// --- Concrete Implementations ---
+
+// S - Single Responsibility Principle (SRP): This class is solely responsible for
+// representing an Airlines entity and providing its details.
+// Encapsulation: All fields are private and accessed through public methods.
+// Polymorphism: It overrides getAirlineDetails() from the AirlineInfo interface.
 class Airlines implements AirlineInfo {
     private Integer airlineId;
     private String airlineName;
@@ -27,7 +54,7 @@ class Airlines implements AirlineInfo {
         this.website = website;
     }
 
-    // Overriding the method from the interface, polymorphism
+    // Overriding the method from the interface, demonstrating polymorphism
     @Override
     public String getAirlineDetails() {
         return "Airline:\n" +
@@ -40,54 +67,114 @@ class Airlines implements AirlineInfo {
     }
 }
 
+// S - Single Responsibility Principle (SRP): Handles all console input.
+class ConsoleInputHandler implements InputHandler {
+    private Scanner scanner;
+
+    public ConsoleInputHandler(Scanner scanner) {
+        this.scanner = scanner;
+    }
+
+    @Override
+    public String promptForString(String message) {
+        System.out.print(message);
+        return scanner.nextLine();
+    }
+
+    @Override
+    public int promptForInt(String message) {
+        System.out.print(message);
+        int value = scanner.nextInt();
+        scanner.nextLine(); // Consume newline
+        return value;
+    }
+
+    @Override
+    public void close() {
+        scanner.close();
+    }
+}
+
+// S - Single Responsibility Principle (SRP): Handles all console output.
+// O - Open/Closed Principle (OCP): The `displayAirlineInfo` method is open for extension
+// because it accepts any `AirlineInfo` implementation, allowing new types of airline
+// information to be displayed without modifying this class.
+class ConsoleOutputHandler implements OutputHandler {
+    @Override
+    public void displayMessage(String message) {
+        System.out.println(message);
+    }
+
+    @Override
+    public void displayAirlineInfo(AirlineInfo airline) {
+        System.out.println("Airline Information:");
+        System.out.println(airline.getAirlineDetails());
+    }
+}
+
+// S - Single Responsibility Principle (SRP): Responsible for creating AirlineInfo objects.
+// D - Dependency Inversion Principle (DIP): High-level modules depend on this abstraction.
+class DefaultAirlineService implements AirlineService {
+    @Override
+    public AirlineInfo createAirline(int id, String name, String code, String headquarters, String contact, String website) {
+        return new Airlines(id, name, code, headquarters, contact, website);
+    }
+}
+
+// --- Main Application Class ---
+
+// S - Single Responsibility Principle (SRP): Its main job is to orchestrate the application flow.
+// D - Dependency Inversion Principle (DIP): It depends on abstractions (interfaces)
+// for input, output, and airline service, not concrete implementations.
 public class AirlineApp {
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
+    private InputHandler inputHandler;
+    private OutputHandler outputHandler;
+    private AirlineService airlineService;
 
-        // Ask the user if they are an admin before proceeding
-        System.out.println("Are you an admin? (yes/no)");
-        String response = scanner.nextLine().toLowerCase();
+    // D - Dependency Inversion Principle (DIP): Constructor Injection.
+    // The AirlineApp depends on abstractions (interfaces) rather than concrete classes.
+    // This makes the class more flexible and testable.
+    public AirlineApp(InputHandler inputHandler, OutputHandler outputHandler, AirlineService airlineService) {
+        this.inputHandler = inputHandler;
+        this.outputHandler = outputHandler;
+        this.airlineService = airlineService;
+    }
 
-        // If not admin, program exits
+    public void run() {
+        outputHandler.displayMessage("Are you an admin? (yes/no)");
+        String response = inputHandler.promptForString("").toLowerCase();
+
         if (!response.equals("yes")) {
-            System.out.println("Access denied. Only admins can input airline details.");
-            System.exit(0);
+            outputHandler.displayMessage("Access denied. Only admins can input airline details.");
+            // System.exit(0); // Consider throwing an exception instead of exiting directly in production code
         } else {
-            // If admin, allow input of airline details
-            System.out.println("\nAccess granted. Please enter Airline Details:");
+            outputHandler.displayMessage("\nAccess granted. Please enter Airline Details:");
 
-            System.out.print("Airline ID: ");
-            int id = scanner.nextInt();
-            scanner.nextLine(); 
+            int id = inputHandler.promptForInt("Airline ID: ");
+            String name = inputHandler.promptForString("Airline Name: ");
+            String code = inputHandler.promptForString("Airline Code: ");
+            String hq = inputHandler.promptForString("Headquarters: ");
+            String contact = inputHandler.promptForString("Contact Number: ");
+            String website = inputHandler.promptForString("Website: ");
 
-            System.out.print("Airline Name: ");
-            String name = scanner.nextLine();
+            // Using the AirlineService abstraction to create the airline object
+            AirlineInfo airline = airlineService.createAirline(id, name, code, hq, contact, website);
 
-            System.out.print("Airline Code: ");
-            String code = scanner.nextLine();
-
-            System.out.print("Headquarters: ");
-            String hq = scanner.nextLine();
-
-            System.out.print("Contact Number: ");
-            String contact = scanner.nextLine();
-
-            System.out.print("Website: ");
-            String website = scanner.nextLine();
-
-            // Create Airlines object using the provided details
-            Airlines airline = new Airlines(id, name, code, hq, contact, website);
-
-            // Display the airline info using a polymorphic method
-            printAirlineInfo(airline);
-
-            scanner.close();
+            // Display the airline info using the OutputHandler abstraction
+            outputHandler.displayAirlineInfo(airline);
         }
     }
 
-    // This method works for any object that implements AirlineInfo e.g new cargoairline class
-    public static void printAirlineInfo(AirlineInfo airline) {
-        System.out.println("Airline Information:");
-        System.out.println(airline.getAirlineDetails());
+    public static void main(String[] args) {
+        Scanner scanner = new Scanner(System.in);
+        InputHandler inputHandler = new ConsoleInputHandler(scanner);
+        OutputHandler outputHandler = new ConsoleOutputHandler();
+        AirlineService airlineService = new DefaultAirlineService();
+
+        // Instantiate the application with injected dependencies
+        AirlineApp app = new AirlineApp(inputHandler, outputHandler, airlineService);
+        app.run(); // Run the main application logic
+
+        inputHandler.close(); // Close the scanner when done
     }
 }
