@@ -2,192 +2,268 @@ import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
+import java.util.regex.Pattern; // For better validation
 
-// import Passport.Visa;
+// --- 1. Interfaces for Abstraction (ISP & DIP) ---
 
-// Abstract Person Class
-// Nimrod: Abstract Person: base for entities like User, ensuring common details.
-abstract class Person {
+// S - Single Responsibility: Defines common identifiable entities.
+interface IdentifiableEntity {
+    String getID();
+}
+
+// S - Single Responsibility: Defines how to get airline specific details.
+interface AirlineInfo {
+    String getAirlineDetails();
+}
+
+// S - Single Responsibility: Defines common person details.
+interface PersonDetails {
+    String getName();
+    String getEmail();
+    String getPhoneNumber();
+    String getRoleDescription();
+}
+
+// S - Single Responsibility: Defines an interface for handling user input.
+interface InputReader {
+    String readLine(String prompt);
+    int readInt(String prompt);
+    double readDouble(String prompt);
+    void close();
+}
+
+// S - Single Responsibility: Defines an interface for handling output.
+interface OutputWriter {
+    void print(String message);
+    void println(String message);
+    void printf(String format, Object... args);
+}
+
+// S - Single Responsibility: Defines a service for managing aircraft.
+// O - Open/Closed: New aircraft types can be handled by implementations.
+interface AircraftManager {
+    void addAircraft(Aircraft aircraft);
+    List<Aircraft> getAllAircraft();
+    void displayAllAircraft(OutputWriter writer);
+}
+
+// S - Single Responsibility: Defines a service for managing airports.
+// O - Open/Closed: New airport types can be handled by implementations.
+interface AirportManager {
+    void addAirport(Airport airport);
+    List<Airport> getAllAirports();
+    void displayAllAirports(OutputWriter writer);
+}
+
+// S - Single Responsibility: Defines a service for managing flights.
+interface FlightManager {
+    List<Flight> getAvailableFlights();
+    void displayAvailableFlights(OutputWriter writer);
+    Flight selectFlight(InputReader reader, OutputWriter writer);
+    boolean bookSeat(Flight flight, String seatId, OutputWriter writer);
+}
+
+// S - Single Responsibility: Defines an interface for payment processing.
+// O - Open/Closed: New payment methods can be added by implementing this.
+// L - Liskov Substitution: Any PaymentProcessor can be used interchangeably.
+interface PaymentProcessor {
+    void processPayment(Booking booking, InputReader reader, OutputWriter writer);
+}
+
+// --- 2. Concrete Implementations (Low-level Modules) ---
+
+// S - Single Responsibility: Focuses on Person attributes.
+// L - Liskov Substitution: User will extend this correctly.
+abstract class Person implements PersonDetails {
     protected String name, email, phoneNumber;
 
     public Person(String name, String email, String phoneNumber) {
-        this.name = name; this.email = email; this.phoneNumber = phoneNumber;
+        this.name = name;
+        this.email = email;
+        this.phoneNumber = phoneNumber;
     }
 
+    @Override
     public String getName() { return name; }
+    @Override
     public String getEmail() { return email; }
+    @Override
     public String getPhoneNumber() { return phoneNumber; }
-    public abstract String getRoleDescription(); // Nimrod: Subclasses define their specific role.
+    @Override
+    public abstract String getRoleDescription();
 }
 
-//  User Class (extends Person) 
-// Nimrod: User class for passengers, extends Person for common attributes.
+// S - Single Responsibility: Represents a user/passenger.
 class User extends Person {
-    public User(String name, String email, String phoneNumber) { super(name, email, phoneNumber); } // Nimrod: super() calls Person constructor.
-
-    public User(String name, String dob, String nationality, Passport passport, Visa visa, String email) {
-        super(name, email, ""); // Provide phoneNumber as empty or as needed
-        // Additional initialization for dob, nationality, passport, visa can be added here if fields exist
+    // Original constructor from your example, adjusted for Person's current fields.
+    // Note: The `Passport` and `Visa` objects are not part of `Person` or `User` fields in the given code,
+    // so this constructor needs adjustment or fields added to User if they are to be stored.
+    // For now, assuming dob, nationality are not stored here.
+    public User(String name, String email, String phoneNumber) {
+        super(name, email, phoneNumber);
     }
 
-    @Override 
+    @Override
     public String getRoleDescription() { return "Passenger"; }
-     // Nimrod: User's role is "Passenger".
-
 }
 
-// Aircraft class 
-// Brian: Aircraft class: holds plane specifications. 
-class Aircraft {
+// S - Single Responsibility: Represents an aircraft's data.
+class Aircraft implements IdentifiableEntity {
     private String registrationNumber, model, manufacturer;
     private int seatingCapacity;
     private double maxTakeoffWeight, range;
     private int yearOfManufacture;
 
-    // Brian: Aircraft constructor (GUI: data entry form for admins, with field validation).
     public Aircraft(String regNum, String model, String manf, int cap, double mtow, double rng, int year) {
-        this.registrationNumber = regNum; this.model = model; this.manufacturer = manf;
-        this.seatingCapacity = cap; this.maxTakeoffWeight = mtow; this.range = rng; this.yearOfManufacture = year;
+        this.registrationNumber = regNum;
+        this.model = model;
+        this.manufacturer = manf;
+        this.seatingCapacity = cap;
+        this.maxTakeoffWeight = mtow;
+        this.range = rng;
+        this.yearOfManufacture = year;
     }
 
-    public void setRange(double range) { this.range = range; } // Brian: Setter for range.
+    @Override
+    public String getID() { return registrationNumber; } // Implementing IdentifiableEntity
     public double getRange() { return range; }
-    public String getRegistrationNumber() { return registrationNumber; }
     public String getModel() { return model; }
     public String getManufacturer() { return manufacturer; }
-    public int getSeatingCapacity() { return seatingCapacity; } // Brian: Capacity important for seat maps.
-    public double getMaxTakeoffWeight() { return maxTakeoffWeight; }
-    public int getYearOfManufacture() { return yearOfManufacture; }
+    public int getSeatingCapacity() { return seatingCapacity; }
 
     @Override
-    // Brian: toString for Aircraft summary
     public String toString() {
         return String.format("Aircraft: %s %s (%s)\n  Capacity: %d, Range: %.1f km, Max Takeoff Weight: %.1f kg, Year: %d",
                 manufacturer, model, registrationNumber, seatingCapacity, range, maxTakeoffWeight, yearOfManufacture);
     }
 }
 
-// Airline interface and class
-// Nimrod: AirlineInfo interface for standard airline detail retrieval.
-interface AirlineInfo { String getAirlineDetails(); }
-
-// Nimrod: Airlines class: concrete airline details, implements AirlineInfo.
+// S - Single Responsibility: Represents an airline's data.
 class Airlines implements AirlineInfo {
     private String airlineName, airlineCode, headquarters, contactNumber, website;
 
-    // Nimrod: Airlines constructor (data typically admin-managed).
     public Airlines(String name, String code, String hq, String contact, String web) {
-        this.airlineName = name; this.airlineCode = code; this.headquarters = hq;
-        this.contactNumber = contact; this.website = web;
+        this.airlineName = name;
+        this.airlineCode = code;
+        this.headquarters = hq;
+        this.contactNumber = contact;
+        this.website = web;
     }
 
-    public String getAirlineName() { return airlineName; }
-    public String getAirlineCode() { return airlineCode; }
-
     @Override
-    // Nimrod: Formatted string of airline details, per AirlineInfo.
     public String getAirlineDetails() {
         return "Airline Name: " + airlineName + "\nAirline Code: " + airlineCode + "\nHeadquarters: " + headquarters +
                "\nContact: " + contactNumber + "\nWebsite: " + website;
     }
 }
 
-// Airport class
-// Brian: Airport class: stores key airport information.
-class Airport {
+// S - Single Responsibility: Represents an airport's data.
+class Airport implements IdentifiableEntity {
     private String name, iataCode, icaoCode, city, country;
     private int numberOfTerminals, numberOfRunways;
     private double latitude, longitude;
-    private List<String> flightNumbersServed = new ArrayList<>();
-
-    // Brian: Airport constructor (GUI: "Add Airport" form, possibly with map integration).
     public Airport(String name, String iata, String icao, String city, String country, int term, int runs, double lat, double lon) {
-        this.name = name; this.iataCode = iata; this.icaoCode = icao; this.city = city; this.country = country;
-        this.numberOfTerminals = term; this.numberOfRunways = runs; this.latitude = lat; this.longitude = lon;
+        this.name = name;
+        this.iataCode = iata;
+        this.icaoCode = icao;
+        this.city = city;
+        this.country = country;
+        this.numberOfTerminals = term;
+        this.numberOfRunways = runs;
+        this.latitude = lat;
+        this.longitude = lon;
     }
 
-    public void addServedFlightNumber(String flightNumber) { flightNumbersServed.add(flightNumber); }
+    @Override
+    public String getID() { return iataCode; } // IATA code as ID for airports
     public String getName() { return name; }
-    public String getIataCode() { return iataCode; } // Brian: IATA/ICAO are key identifiers.
+    public String getIataCode() { return iataCode; }
     public String getCity() { return city; }
     public String getCountry() { return country; }
 
     @Override
-    // Brian: toString for Airport summary
     public String toString() {
         return String.format("Airport: %s (%s/%s)\n  Location: %s, %s\n  Terminals: %d, Runways: %d\n  Coordinates: Lat %.4f, Lon %.4f",
                 name, iataCode, icaoCode, city, country, numberOfTerminals, numberOfRunways, latitude, longitude);
     }
-    public List<String> getFlights() { return flightNumbersServed; }
 }
 
-// Booking class 
-// Ryan: Booking system: this class captures flight reservation details.
+// S - Single Responsibility: Represents a flight booking.
 class Booking {
-    private static int idCounter = 1; // Ryan: Static counter for unique booking IDs.
+    private static int idCounter = 1;
     private int bookingId;
-    private User passenger; // Ryan: Booking tied to a User.
-    private String flightId, seatId;
+    private User passenger;
+    private String flightNumber, seatId; // Changed from flightId to flightNumber for consistency with Flight class
     private LocalDateTime bookingTime;
     private double totalPrice;
-    private String bookingStatus = "Confirmed", paymentStatus = "Pending"; // Ryan: Initial statuses.
-    
+    private String bookingStatus = "Confirmed", paymentStatus = "Pending";
 
-    // Ryan: Booking constructor, called after flight/seat selection. (Integrate Baggage later on).
-    public Booking(User passenger, String flightId, String seatId, double totalPrice) {
-        this.bookingId = idCounter++; this.passenger = passenger; this.flightId = flightId; this.seatId = seatId;
-        this.totalPrice = totalPrice; this.bookingTime = LocalDateTime.now();
+    // Re-evaluate this constructor based on the original intent.
+    // The previous constructor had `Object passenger2` and `int seatId2`, which were problematic.
+    // This assumes a user and a specific flight object are passed.
+    public Booking(User passenger, Flight flight, String seatId) {
+        this.bookingId = idCounter++;
+        this.passenger = passenger;
+        this.flightNumber = flight.getFlightNumber();
+        this.seatId = seatId;
+        this.totalPrice = flight.getPrice(); // Price comes from the flight
+        this.bookingTime = LocalDateTime.now();
     }
 
-    public Booking(Object passenger2, String flightId2, int seatId2, double totalPrice2) {
-        //TODO Auto-generated constructor stub
+    public void displayBookingDetails(OutputWriter writer) {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        writer.println("\nBooking Confirmation");
+        writer.println("Booking ID: " + bookingId);
+        writer.println("Passenger: " + passenger.getName() + " (" + passenger.getRoleDescription() + ")");
+        writer.println("Email: " + passenger.getEmail());
+        writer.println("Phone: " + passenger.getPhoneNumber());
+        writer.println("Flight Number: " + flightNumber);
+        writer.println("Seat ID: " + seatId);
+        writer.println("Booking Time: " + bookingTime.format(formatter));
+        writer.printf("Total Price: $%.2f%n", totalPrice);
+        writer.println("Booking Status: " + bookingStatus);
+        writer.println("Payment Status: " + paymentStatus);
+        writer.println("--------------------------");
     }
 
-    // Ryan: Displays booking confirmation to the user.
-    public void displayBookingDetails() {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"); // Ryan: Readable date format.
-        System.out.println("\nBooking Confirmation\nBooking ID: " + bookingId +
-                "\nPassenger: " + passenger.getName() + " (" + passenger.getRoleDescription() + ")" +
-                "\nEmail: " + passenger.getEmail() + "\nPhone: " + passenger.getPhoneNumber() +
-                "\nFlight ID: " + flightId + "\nSeat ID: " + seatId +
-                "\nBooking Time: " + bookingTime.format(formatter) +
-                String.format("\nTotal Price: $%.2f", totalPrice) +
-                "\nBooking Status: " + bookingStatus + "\nPayment Status: " + paymentStatus +
-                "\n--------------------------");
-    }
-
-    public int getBookingId() { return bookingId; } // Ryan: ID for referencing (e.g. in payments).
-    public double getTotalPrice() { return totalPrice; } // Ryan: Needed by payment module.
-    public void setPaymentStatus(String status) { this.paymentStatus = status; } // Ryan: Allows payment module to update.
-
+    public int getBookingId() { return bookingId; }
+    public double getTotalPrice() { return totalPrice; }
+    public void setPaymentStatus(String status) { this.paymentStatus = status; }
+    public String getPaymentStatus() { return paymentStatus; } // Added getter for paymentStatus
 }
 
-// Flight class
-// Sean: Flight class: flight info, seat management, display options.
-class Flight {
-    private String flightNumber, arrivalLocation;
+// S - Single Responsibility: Represents a flight with seat management.
+class Flight implements IdentifiableEntity {
+    private String flightNumber, departureLocation, arrivalLocation; // Added departure location
     private double price;
-    private Set<String> bookedSeats = new HashSet<>(); // Sean: HashSet for efficient seat lookup.
-    // Sean: Fixed seat layout.
+    private Set<String> bookedSeats = new HashSet<>();
     private static final int MAX_ROWS = 14;
     private static final char[] SEAT_LETTERS = {'A', 'B', 'C', 'D', 'E', 'F'};
 
-    public Flight(String flightNum, String arrivalLoc, double price) {
-        this.flightNumber = flightNum; this.arrivalLocation = arrivalLoc; this.price = price;
+    public Flight(String flightNum, String departureLoc, String arrivalLoc, double price) {
+        this.flightNumber = flightNum;
+        this.departureLocation = departureLoc;
+        this.arrivalLocation = arrivalLoc;
+        this.price = price;
     }
 
-    public void displayInfo() { System.out.printf("Flight: %s to %s - Price: $%.2f\n", flightNumber, arrivalLocation, price); } // Sean: Basic flight option display.
+    @Override
+    public String getID() { return flightNumber; }
 
-    // Sean: UI for showing available/booked seats.
-    public void displayAvailableSeats() {
-        System.out.println("Available Seats for Flight " + flightNumber + ":");
+    public void displayInfo(OutputWriter writer) {
+        writer.printf("Flight: %s from %s to %s - Price: $%.2f%n", flightNumber, departureLocation, arrivalLocation, price);
+    }
+
+    public void displayAvailableSeats(OutputWriter writer) {
+        writer.println("Available Seats for Flight " + flightNumber + ":");
         for (int r = 1; r <= MAX_ROWS; r++) {
-            for (char l : SEAT_LETTERS) System.out.print((bookedSeats.contains(r + "" + l) ? "XX " : (r + "" + l + " ")));
-            System.out.println();
+            for (char l : SEAT_LETTERS) {
+                writer.print((bookedSeats.contains(r + "" + l) ? "XX " : (r + "" + l + " ")));
+            }
+            writer.println("");
         }
     }
 
-    // Sean: Validates seat ID format and bounds.
     public boolean isSeatValid(String seatId) {
         if (seatId == null || seatId.length() < 2) return false;
         try {
@@ -199,12 +275,17 @@ class Flight {
         } catch (NumberFormatException e) { return false; }
     }
 
-    // Sean: Handles booking a seat on this flight.
     public boolean bookSeat(String seatId) {
-        if (!isSeatValid(seatId)) { System.out.println("Error: Invalid seat format or out of bounds."); return false; }
-        if (bookedSeats.contains(seatId)) { System.out.println("Error: Seat " + seatId + " is already booked."); return false; }
+        if (!isSeatValid(seatId)) {
+            System.out.println("Error: Invalid seat format or out of bounds."); // Direct System.out here for simplicity in this method, but generally use OutputWriter
+            return false;
+        }
+        if (bookedSeats.contains(seatId)) {
+            System.out.println("Error: Seat " + seatId + " is already booked."); // Direct System.out here for simplicity in this method, but generally use OutputWriter
+            return false;
+        }
         bookedSeats.add(seatId);
-        System.out.println("Seat " + seatId + " booked successfully for flight " + flightNumber + ".");
+        System.out.println("Seat " + seatId + " booked successfully for flight " + flightNumber + "."); // Direct System.out here for simplicity in this method, but generally use OutputWriter
         return true;
     }
 
@@ -213,243 +294,472 @@ class Flight {
     public String getArrivalLocation() { return arrivalLocation; }
 }
 
-// Payments Superclass
-// Louis: Abstract Payments class: common structure for payment types. .
-abstract class Payments {
-    protected int paymentId, bookingId; // Louis: Links payment to booking.
+// S - Single Responsibility: Abstract base for payment processing.
+abstract class AbstractPayment implements PaymentProcessor {
+    protected int paymentId;
     protected double amount;
     protected String paymentMethod;
-    protected Date paymentDate;
+    protected Date paymentDate; // java.sql.Date is typically for DB, java.util.Date or java.time.LocalDate/Instant are more common for general use. Sticking with your original.
 
-    public Payments(int pId, int bId, double amt, String method, Date date) {
-        this.paymentId = pId; this.bookingId = bId; this.amount = amt;
-        this.paymentMethod = method; this.paymentDate = date;
+    public AbstractPayment(int pId, double amt, String method, Date date) {
+        this.paymentId = pId;
+        this.amount = amt;
+        this.paymentMethod = method;
+        this.paymentDate = date;
     }
 
     public double getAmount() { return amount; }
-    // Louis: Basic common validation. (DB: check bookingId exists & pending).
-    public boolean validatePaymentDetails() { return amount > 0 && paymentMethod != null && !paymentMethod.isEmpty() && paymentDate != null; }
-    // Louis: Abstract: each payment type implements. (DB: log transaction).
-    public abstract void processPayment(Booking booking);
+
+    // SRP: Validation logic belongs here or in a separate validator.
+    // OCP: Subclasses can extend this validation or add their own.
+    protected boolean validatePaymentDetails() {
+        return amount > 0 && paymentMethod != null && !paymentMethod.isEmpty() && paymentDate != null;
+    }
+
+    // Abstract method to be implemented by concrete payment types.
+    @Override
+    public abstract void processPayment(Booking booking, InputReader reader, OutputWriter writer);
 
     @Override
-    // Louis: Generic toString for payment. (DB: data resides in a table).
-    public String toString() { return String.format("Payment ID: %d, Booking ID: %d, Amount: $%.2f, Method: %s, Date: %s", paymentId, bookingId, amount, paymentMethod, paymentDate.toString()); }
+    public String toString() {
+        return String.format("Payment ID: %d, Amount: $%.2f, Method: %s, Date: %s", paymentId, amount, paymentMethod, paymentDate.toString());
+    }
 }
 
-// CashPayment Class (extends Payments)
-// Louis: CashPayment, a specific Payment type.
-class CashPayment extends Payments {
-    public CashPayment(int pId, int bId, double amt, Date date) { super(pId, bId, amt, "Cash", date); } // Louis: Calls superclass constructor.
+// S - Single Responsibility: Handles cash payments.
+class CashPayment extends AbstractPayment {
+    public CashPayment(int pId, double amt, Date date) {
+        super(pId, amt, "Cash", date);
+    }
 
     @Override
-    // Louis: Cash transaction processing. (DB: Record successful/failed payment).
-    public void processPayment(Booking booking) {
-        System.out.println("\nProcessing cash payment...");
+    public void processPayment(Booking booking, InputReader reader, OutputWriter writer) {
+        writer.println("\nProcessing cash payment...");
         if (validatePaymentDetails()) {
-            System.out.println("Payment of $" + String.format("%.2f", amount) + " using " + paymentMethod + " accepted for booking ID " + bookingId + ".\nPayment successful on: " + paymentDate.toString());
+            writer.printf("Payment of $%.2f using %s accepted for booking ID %d. Payment successful on: %s%n",
+                          amount, paymentMethod, booking.getBookingId(), paymentDate.toString());
             booking.setPaymentStatus("Paid");
         } else {
-            System.out.println("Cash payment validation failed for booking ID " + bookingId + ".");
+            writer.println("Cash payment validation failed for booking ID " + booking.getBookingId() + ".");
             booking.setPaymentStatus("Failed");
         }
     }
 }
 
-// CardPayment Class (extends Payments)
-// Louis: CardPayment, another specific Payment type.
-class CardPayment extends Payments {
-    private String cardNumber, expiryDate, cvv; // Louis: Card details (CVV never stored; cardNum tokenized/masked in DB).
+// S - Single Responsibility: Handles card payments.
+class CardPayment extends AbstractPayment {
+    private String cardNumber, expiryDate, cvv;
 
-    public CardPayment(int pId, int bId, double amt, Date date, String cNum, String exp, String cvv) {
-        super(pId, bId, amt, "Card", date);
-        this.cardNumber = cNum; this.expiryDate = exp; this.cvv = cvv;
+    public CardPayment(int pId, double amt, Date date, String cNum, String exp, String cvv) {
+        super(pId, amt, "Card", date);
+        this.cardNumber = cNum;
+        this.expiryDate = exp;
+        this.cvv = cvv;
     }
 
     @Override
-    // Louis: Card-specific validation + base. (Real validation via payment gateway).
-    public boolean validatePaymentDetails() {
-        return super.validatePaymentDetails() && cardNumber != null && cardNumber.matches("\\d{16}") &&
-               expiryDate != null && expiryDate.matches("\\d{2}/\\d{2}") && cvv != null && cvv.matches("\\d{3}");
+    protected boolean validatePaymentDetails() {
+        // Extended validation for card details
+        return super.validatePaymentDetails() &&
+               cardNumber != null && Pattern.matches("\\d{16}", cardNumber) &&
+               expiryDate != null && Pattern.matches("\\d{2}/\\d{2}", expiryDate) &&
+               cvv != null && Pattern.matches("\\d{3}", cvv);
     }
 
     @Override
-    // Louis: Card transaction processing. (DB: Integrate gateway, log transaction ID).
-    public void processPayment(Booking booking) {
-        System.out.println("\nProcessing card payment...");
+    public void processPayment(Booking booking, InputReader reader, OutputWriter writer) {
+        writer.println("\nProcessing card payment...");
         if (validatePaymentDetails()) {
-            System.out.println("Payment of $" + String.format("%.2f", amount) + " using Card (ending with " +
-                               cardNumber.substring(cardNumber.length() - 4) + ") accepted for booking ID " + bookingId + ".\nPayment successful on: " + paymentDate.toString());
+            writer.printf("Payment of $%.2f using Card (ending with %s) accepted for booking ID %d. Payment successful on: %s%n",
+                          amount, cardNumber.substring(cardNumber.length() - 4), booking.getBookingId(), paymentDate.toString());
             booking.setPaymentStatus("Paid");
         } else {
-            System.out.println("Card payment validation failed for booking ID " + bookingId + ".");
+            writer.println("Card payment validation failed for booking ID " + booking.getBookingId() + ".");
             booking.setPaymentStatus("Failed");
         }
     }
 }
 
-// Main Class
-// PlaneBookingSystem: ties everything together.
+// S - Single Responsibility: Provides console-based input.
+class ConsoleInputReader implements InputReader {
+    private Scanner scanner;
+
+    public ConsoleInputReader() {
+        this.scanner = new Scanner(System.in);
+    }
+
+    @Override
+    public String readLine(String prompt) {
+        System.out.print(prompt);
+        return scanner.nextLine();
+    }
+
+    @Override
+    public int readInt(String prompt) {
+        System.out.print(prompt);
+        while (!scanner.hasNextInt()) {
+            System.out.println("Invalid input. Please enter a number.");
+            scanner.next(); // consume the invalid input
+            System.out.print(prompt);
+        }
+        int value = scanner.nextInt();
+        scanner.nextLine(); // Consume newline left-over
+        return value;
+    }
+
+    @Override
+    public double readDouble(String prompt) {
+        System.out.print(prompt);
+        while (!scanner.hasNextDouble()) {
+            System.out.println("Invalid input. Please enter a number.");
+            scanner.next(); // consume the invalid input
+            System.out.print(prompt);
+        }
+        double value = scanner.nextDouble();
+        scanner.nextLine(); // Consume newline left-over
+        return value;
+    }
+
+    @Override
+    public void close() {
+        scanner.close();
+    }
+}
+
+// S - Single Responsibility: Provides console-based output.
+class ConsoleOutputWriter implements OutputWriter {
+    @Override
+    public void print(String message) {
+        System.out.print(message);
+    }
+
+    @Override
+    public void println(String message) {
+        System.out.println(message);
+    }
+
+    @Override
+    public void printf(String format, Object... args) {
+        System.out.printf(format, args);
+    }
+}
+
+// --- 3. Service Layer (High-level Modules) ---
+
+// S - Single Responsibility: Manages aircraft data and operations.
+class SimpleAircraftManager implements AircraftManager {
+    private List<Aircraft> aircraftFleet = new ArrayList<>();
+
+    @Override
+    public void addAircraft(Aircraft aircraft) {
+        aircraftFleet.add(aircraft);
+    }
+
+    @Override
+    public List<Aircraft> getAllAircraft() {
+        return Collections.unmodifiableList(aircraftFleet); // Return unmodifiable list for safety
+    }
+
+    @Override
+    public void displayAllAircraft(OutputWriter writer) {
+        writer.println("\nRegistered Aircraft Fleet");
+        if (aircraftFleet.isEmpty()) {
+            writer.println("No aircraft added yet.");
+            return;
+        }
+        for (int i = 0; i < aircraftFleet.size(); i++) {
+            writer.println("\nAircraft #" + (i + 1) + "\n" + aircraftFleet.get(i));
+        }
+        writer.println("-------------------------------");
+    }
+}
+
+// S - Single Responsibility: Manages airport data and operations.
+class SimpleAirportManager implements AirportManager {
+    private List<Airport> airportNetwork = new ArrayList<>();
+
+    @Override
+    public void addAirport(Airport airport) {
+        airportNetwork.add(airport);
+    }
+
+    @Override
+    public List<Airport> getAllAirports() {
+        return Collections.unmodifiableList(airportNetwork); // Return unmodifiable list for safety
+    }
+
+    @Override
+    public void displayAllAirports(OutputWriter writer) {
+        writer.println("\nRegistered Airports");
+        if (airportNetwork.isEmpty()) {
+            writer.println("No airports added yet.");
+            return;
+        }
+        for (int i = 0; i < airportNetwork.size(); i++) {
+            writer.println("\nAirport #" + (i + 1) + "\n" + airportNetwork.get(i));
+        }
+    }
+}
+
+// S - Single Responsibility: Manages flight data and operations.
+class SimpleFlightManager implements FlightManager {
+    private List<Flight> availableFlights;
+
+    public SimpleFlightManager(List<Flight> initialFlights) {
+        this.availableFlights = new ArrayList<>(initialFlights);
+    }
+
+    @Override
+    public List<Flight> getAvailableFlights() {
+        return Collections.unmodifiableList(availableFlights); // Return unmodifiable list for safety
+    }
+
+    @Override
+    public void displayAvailableFlights(OutputWriter writer) {
+        if (availableFlights.isEmpty()) {
+            writer.println("\nSorry, no flights available.");
+            return;
+        }
+        writer.println("\nAvailable Flights:");
+        for (int i = 0; i < availableFlights.size(); i++) {
+            writer.print((i + 1) + ". ");
+            availableFlights.get(i).displayInfo(writer);
+        }
+    }
+
+    @Override
+    public Flight selectFlight(InputReader reader, OutputWriter writer) {
+        Flight selectedFlight = null;
+        while (selectedFlight == null) {
+            String choiceStr = reader.readLine("\nSelect a flight by number (1-" + availableFlights.size() + "): ");
+            try {
+                int choice = Integer.parseInt(choiceStr);
+                if (choice >= 1 && choice <= availableFlights.size()) {
+                    selectedFlight = availableFlights.get(choice - 1);
+                } else {
+                    writer.println("Invalid flight selection.");
+                }
+            } catch (NumberFormatException e) {
+                writer.println("Invalid input. Enter a number.");
+            }
+        }
+        return selectedFlight;
+    }
+
+    @Override
+    public boolean bookSeat(Flight flight, String seatId, OutputWriter writer) {
+        // Flight class itself has the booking logic for a seat on that specific flight
+        // We can optionally add more logic here related to the FlightManager's overview of all flights
+        return flight.bookSeat(seatId);
+    }
+}
+
+// S - Single Responsibility: Orchestrates payment selection and processing.
+class DefaultPaymentService {
+    private static int nextPaymentId = 1; // Manages payment IDs
+
+    // OCP: This method is open to new payment types without modification if they implement PaymentProcessor.
+    // DIP: Depends on the PaymentProcessor interface.
+    public void initiatePayment(Booking booking, InputReader reader, OutputWriter writer) {
+        writer.println("\n--- Payment ---");
+        writer.print("Choose payment method: (1) Cash (2) Card: ");
+        String paymentChoice = reader.readLine("");
+
+        PaymentProcessor payment;
+        if ("1".equals(paymentChoice)) {
+            payment = new CashPayment(nextPaymentId++, booking.getTotalPrice(), new Date(System.currentTimeMillis()));
+        } else if ("2".equals(paymentChoice)) {
+            String cardNum = reader.readLine("Enter card number (16 digits): ");
+            String expiry = reader.readLine("Enter expiry date (MM/YY): ");
+            String cvv = reader.readLine("Enter CVV (3 digits): ");
+            payment = new CardPayment(nextPaymentId++, booking.getTotalPrice(), new Date(System.currentTimeMillis()), cardNum, expiry, cvv);
+        } else {
+            writer.println("Invalid choice. Defaulting to Cash.");
+            payment = new CashPayment(nextPaymentId++, booking.getTotalPrice(), new Date(System.currentTimeMillis()));
+        }
+        payment.processPayment(booking, reader, writer);
+    }
+}
+
+
+// --- 4. Main Application (High-level Orchestrator) ---
+
+// S - Single Responsibility: Orchestrates the overall application flow and interactions.
+// D - Dependency Inversion: Depends on abstractions (interfaces) for its functionality.
 public class PlaneBookingSystem {
-    // Brian: Static lists. 
-    private static List<Aircraft> aircraftFleet = new ArrayList<>();
-    private static List<Airport> airportNetwork = new ArrayList<>();
-    // Sean: Pre-populated flight options.
-    private static List<Flight> availableFlights = new ArrayList<>(Arrays.asList(
-            new Flight("SA101", "Cape Town", 120.50), new Flight("KQ202", "Nairobi", 90.00), new Flight("ET303", "Addis Ababa", 110.75) ));
-    private static int nextPaymentId = 1; // Louis: Simple ID counter (DB: auto-increment key).
+    private InputReader inputReader;
+    private OutputWriter outputWriter;
+    private AircraftManager aircraftManager;
+    private AirportManager airportManager;
+    private FlightManager flightManager;
+    private DefaultPaymentService paymentService; // Can also be an interface
 
-    public static void main(String[] args) {
-        Scanner scanner = new Scanner(System.in);
-        System.out.println(" Welcome to the Plane Booking System ");
+    // DIP: Constructor injection for all dependencies.
+    public PlaneBookingSystem(InputReader inputReader, OutputWriter outputWriter,
+                              AircraftManager aircraftManager, AirportManager airportManager,
+                              FlightManager flightManager, DefaultPaymentService paymentService) {
+        this.inputReader = inputReader;
+        this.outputWriter = outputWriter;
+        this.aircraftManager = aircraftManager;
+        this.airportManager = airportManager;
+        this.flightManager = flightManager;
+        this.paymentService = paymentService;
+    }
+
+    public void run() {
+        outputWriter.println(" Welcome to the Plane Booking System ");
 
         while (true) {
-            System.out.print("\nAre you an Admin or a User? (Enter A or U, or Q to quit): ");
-            String role = scanner.nextLine().toUpperCase();
-            if (role.equals("A")) runAdminPortal(scanner);      // Brian: Admin functions.
-            else if (role.equals("U")) runUserPortal(scanner); // Nimrod/Sean/Ryan/Louis: User booking flow.
-            else if (role.equals("Q")) { System.out.println("Thank you for using the Plane Booking System. Goodbye!"); break; }
-            else System.out.println("Invalid option. Please enter 'A', 'U', or 'Q'.");
+            outputWriter.print("\nAre you an Admin or a User? (Enter A or U, or Q to quit): ");
+            String role = inputReader.readLine("").toUpperCase();
+
+            if (role.equals("A")) {
+                runAdminPortal();
+            } else if (role.equals("U")) {
+                runUserPortal();
+            } else if (role.equals("Q")) {
+                outputWriter.println("Thank you for using the Plane Booking System. Goodbye!");
+                break;
+            } else {
+                outputWriter.println("Invalid option. Please enter 'A', 'U', or 'Q'.");
+            }
         }
-        scanner.close();
+        inputReader.close();
     }
 
     // Admin Portal
-    private static void runAdminPortal(Scanner scanner) {
-        //Admin main menu.
-        System.out.println("\nAdmin Portal");
+    private void runAdminPortal() {
+        outputWriter.println("\nAdmin Portal");
         boolean adminRunning = true;
         while (adminRunning) {
-            System.out.println("\nAdmin Menu:\n1. Add New Airport\n2. View All Airports\n3. Add New Aircraft\n4. View All Aircraft\n5. Add New Flight (Future Feature)\n6. Back to Main Menu"); // Brian: Airport/Aircraft mgt. Sean: Future flight def.
-            System.out.print("Choose an option: ");
-            String choice = scanner.nextLine().trim();
+            outputWriter.println("\nAdmin Menu:\n1. Add New Airport\n2. View All Airports\n3. Add New Aircraft\n4. View All Aircraft\n5. Add New Flight (Future Feature)\n6. Back to Main Menu");
+            String choice = inputReader.readLine("Choose an option: ").trim();
             switch (choice) {
-                case "1": addAirport(scanner); break;    // Brian: Add airport data.
-                case "2": viewAirports(); break;     // Brian: View airports (GUI: table/list).
-                case "3": addAircraft(scanner); break;   // Brian: Add aircraft data.
-                case "4": viewAircraft(); break;     // Brian: View aircraft (GUI: sort/filter).
-                case "5": System.out.println("Adding new flights by admin is a feature being worked on."); break;
+                case "1": addAirport(); break;
+                case "2": airportManager.displayAllAirports(outputWriter); break;
+                case "3": addAircraft(); break;
+                case "4": aircraftManager.displayAllAircraft(outputWriter); break;
+                case "5": outputWriter.println("Adding new flights by admin is a feature being worked on."); break;
                 case "6": adminRunning = false; break;
-                default: System.out.println("Invalid option. Please try again.");
+                default: outputWriter.println("Invalid option. Please try again.");
             }
         }
     }
 
-    //Admin inputs new airport details.
-    private static void addAirport(Scanner scanner) {
-        System.out.println("\nAdd New Airport");
+    private void addAirport() {
+        outputWriter.println("\nAdd New Airport");
         try {
-            System.out.print("Enter airport name: "); String name = scanner.nextLine();
-            System.out.print("Enter IATA code: "); String iata = scanner.nextLine();
-            System.out.print("Enter ICAO code: "); String icao = scanner.nextLine();
-            System.out.print("Enter city: "); String city = scanner.nextLine();
-            System.out.print("Enter country: "); String country = scanner.nextLine();
-            System.out.print("Enter number of terminals: "); int term = Integer.parseInt(scanner.nextLine());
-            System.out.print("Enter number of runways: "); int runs = Integer.parseInt(scanner.nextLine());
-            System.out.print("Enter latitude: "); double lat = Double.parseDouble(scanner.nextLine());
-            System.out.print("Enter longitude: "); double lon = Double.parseDouble(scanner.nextLine());
-            airportNetwork.add(new Airport(name, iata, icao, city, country, term, runs, lat, lon));
-            System.out.println("Airport '" + name + "' added successfully!"); // Brian: (GUI: refresh list).
-        } catch (NumberFormatException e) { System.out.println("Invalid number format."); }
-          catch (Exception e) { System.out.println("An error occurred: " + e.getMessage()); }
+            String name = inputReader.readLine("Enter airport name: ");
+            String iata = inputReader.readLine("Enter IATA code: ");
+            String icao = inputReader.readLine("Enter ICAO code: ");
+            String city = inputReader.readLine("Enter city: ");
+            String country = inputReader.readLine("Enter country: ");
+            int term = inputReader.readInt("Enter number of terminals: ");
+            int runs = inputReader.readInt("Enter number of runways: ");
+            double lat = inputReader.readDouble("Enter latitude: ");
+            double lon = inputReader.readDouble("Enter longitude: ");
+            airportManager.addAirport(new Airport(name, iata, icao, city, country, term, runs, lat, lon));
+            outputWriter.println("Airport '" + name + "' added successfully!");
+        } catch (Exception e) { // Catching general Exception for simplicity, but more specific catches are better.
+            outputWriter.println("An error occurred: " + e.getMessage());
+        }
     }
 
-    // Brian: Displays registered airports. (GUI: sortable table/map).
-    private static void viewAirports() {
-        System.out.println("\nRegistered Airports");
-        if (airportNetwork.isEmpty()) { System.out.println("No airports added yet."); return; }
-        for (int i = 0; i < airportNetwork.size(); i++) System.out.println("\nAirport #" + (i + 1) + "\n" + airportNetwork.get(i));
-        
-    }
-
-    // Brian: Admin inputs new aircraft details. (GUI: dropdowns, validation).
-    private static void addAircraft(Scanner scanner) {
-        System.out.println("\nAdd New Aircraft");
+    private void addAircraft() {
+        outputWriter.println("\nAdd New Aircraft");
         try {
-            System.out.print("Enter registration number: "); String reg = scanner.nextLine();
-            System.out.print("Enter model: "); String model = scanner.nextLine();
-            System.out.print("Enter manufacturer: "); String manf = scanner.nextLine();
-            System.out.print("Enter seating capacity: "); int cap = Integer.parseInt(scanner.nextLine());
-            System.out.print("Enter max takeoff weight (kg): "); double mtow = Double.parseDouble(scanner.nextLine());
-            System.out.print("Enter range (km): "); double rng = Double.parseDouble(scanner.nextLine());
-            System.out.print("Enter year of manufacture: "); int year = Integer.parseInt(scanner.nextLine());
-            aircraftFleet.add(new Aircraft(reg, model, manf, cap, mtow, rng, year));
-            System.out.println("Aircraft '" + manf + " " + model + " (" + reg + ")' added successfully!");
-        } catch (NumberFormatException e) { System.out.println("Invalid number format."); }
-          catch (Exception e) { System.out.println("An error occurred: " + e.getMessage()); }
-    }
-
-    // Displays registered aircraft
-    private static void viewAircraft() {
-        System.out.println("\nRegistered Aircraft Fleet");
-        if (aircraftFleet.isEmpty()) { System.out.println("No aircraft added yet."); return; }
-        for (int i = 0; i < aircraftFleet.size(); i++) System.out.println("\nAircraft #" + (i + 1) + "\n" + aircraftFleet.get(i));
-        System.out.println("-------------------------------");
+            String reg = inputReader.readLine("Enter registration number: ");
+            String model = inputReader.readLine("Enter model: ");
+            String manf = inputReader.readLine("Enter manufacturer: ");
+            int cap = inputReader.readInt("Enter seating capacity: ");
+            double mtow = inputReader.readDouble("Enter max takeoff weight (kg): ");
+            double rng = inputReader.readDouble("Enter range (km): ");
+            int year = inputReader.readInt("Enter year of manufacture: ");
+            aircraftManager.addAircraft(new Aircraft(reg, model, manf, cap, mtow, rng, year));
+            outputWriter.println("Aircraft '" + manf + " " + model + " (" + reg + ")' added successfully!");
+        } catch (Exception e) {
+            outputWriter.println("An error occurred: " + e.getMessage());
+        }
     }
 
     // User Portal for flight booking
-    private static void runUserPortal(Scanner scanner) {
-        System.out.println("\n User Portal: Book a Flight");
-        // Nimrod: Collect passenger details for User object.
-        System.out.println("Please enter your details to proceed.");
-        System.out.print("Enter full name: "); String name = scanner.nextLine();
-        System.out.print("Enter email: "); String email = scanner.nextLine();
-        System.out.print("Enter phone number: "); String phone = scanner.nextLine();
+    private void runUserPortal() {
+        outputWriter.println("\n User Portal: Book a Flight");
+
+        // Collect passenger details for User object.
+        outputWriter.println("Please enter your details to proceed.");
+        String name = inputReader.readLine("Enter full name: ");
+        String email = inputReader.readLine("Enter email: ");
+        String phone = inputReader.readLine("Enter phone number: ");
         User user = new User(name, email, phone);
-        System.out.println("Welcome, " + user.getName() + "!");
+        outputWriter.println("Welcome, " + user.getName() + "!");
 
-        // Sean: Display available flight options.
-        if (availableFlights.isEmpty()) { System.out.println("\nSorry, no flights available."); return; }
-        System.out.println("\nAvailable Flights:");
-        for (int i = 0; i < availableFlights.size(); i++) { System.out.print((i + 1) + ". "); availableFlights.get(i).displayInfo(); }
+        flightManager.displayAvailableFlights(outputWriter);
 
-        Flight selectedFlight = null;
-        // Sean: Handle user's flight selection.
-        while (selectedFlight == null) {
-            System.out.print("\nSelect a flight by number (1-" + availableFlights.size() + "): ");
-            try {
-                int choice = Integer.parseInt(scanner.nextLine());
-                if (choice >= 1 && choice <= availableFlights.size()) selectedFlight = availableFlights.get(choice - 1);
-                else System.out.println("Invalid flight selection.");
-            } catch (NumberFormatException e) { System.out.println("Invalid input. Enter a number."); }
+        if (flightManager.getAvailableFlights().isEmpty()) {
+            // Already handled by displayAvailableFlights, but good to double check
+            return;
         }
 
-        // Sean: Display seat map & handle seat selection.
-        System.out.println("\nSeat Selection for Flight " + selectedFlight.getFlightNumber() + " to " + selectedFlight.getArrivalLocation());
-        selectedFlight.displayAvailableSeats();
-        String selectedSeat; boolean seatBooked = false;
+        Flight selectedFlight = flightManager.selectFlight(inputReader, outputWriter);
+        if (selectedFlight == null) {
+            outputWriter.println("Flight selection failed. Returning to main menu.");
+            return;
+        }
+
+        outputWriter.println("\nSeat Selection for Flight " + selectedFlight.getFlightNumber() + " to " + selectedFlight.getArrivalLocation());
+        selectedFlight.displayAvailableSeats(outputWriter); // Using flight's method for its own state
+
+        String selectedSeat = null;
+        boolean seatBooked = false;
         while (!seatBooked) {
-            System.out.print("\nSelect your seat (e.g., 3C): "); selectedSeat = scanner.nextLine().trim().toUpperCase();
-            if (selectedFlight.isSeatValid(selectedSeat)) { if (selectedFlight.bookSeat(selectedSeat)) seatBooked = true; }
-            else System.out.println("Invalid seat format or seat does not exist.");
+            selectedSeat = inputReader.readLine("Select your seat (e.g., 3C): ").trim().toUpperCase();
+            if (selectedFlight.isSeatValid(selectedSeat)) {
+                if (selectedFlight.bookSeat(selectedSeat)) { // This method prints its own success/error messages
+                    seatBooked = true;
+                }
+            } else {
+                outputWriter.println("Invalid seat format or seat does not exist.");
+            }
         }
 
-        // Ryan: Create Booking object.
-        Booking booking = new Booking(user, selectedFlight.getFlightNumber(), scanner.nextLine().trim().toUpperCase(), selectedFlight.getPrice()); // Re-prompt for selectedSeat as it's local to loop. Better fix: use the `selectedSeat` from loop.
-       
+        // Create Booking object after successful seat booking
+        Booking booking = new Booking(user, selectedFlight, selectedSeat);
 
-        // Louis: Handle payment process. 
-        System.out.println("\n--- Payment ---");
+        // Handle payment process using the injected service
+        paymentService.initiatePayment(booking, inputReader, outputWriter);
 
-        // Louis: Handle payment process. (DB: payment options could be dynamic).
-        System.out.println("\nPayment");
+        // Display final booking confirmation
+        booking.displayBookingDetails(outputWriter);
 
-        System.out.print("Choose payment method: (1) Cash (2) Card: "); String paymentChoice = scanner.nextLine().trim();
-        Payments payment;
-        if ("1".equals(paymentChoice)) payment = new CashPayment(nextPaymentId++, booking.getBookingId(), booking.getTotalPrice(), new Date(System.currentTimeMillis()));
-        else if ("2".equals(paymentChoice)) {
-            System.out.print("Enter card number (16 digits): "); String cardNum = scanner.nextLine();
-            System.out.print("Enter expiry date (MM/YY): "); String expiry = scanner.nextLine();
-            System.out.print("Enter CVV (3 digits): "); String cvv = scanner.nextLine();
-            payment = new CardPayment(nextPaymentId++, booking.getBookingId(), booking.getTotalPrice(), new Date(System.currentTimeMillis()), cardNum, expiry, cvv);
-        } else {
-            System.out.println("Invalid choice. Defaulting to Cash.");
-            payment = new CashPayment(nextPaymentId++, booking.getBookingId(), booking.getTotalPrice(), new Date(System.currentTimeMillis()));
-        }
-        payment.processPayment(booking);
-        if ("Paid".equals(booking)) // Louis: Process payment & update booking. (DB: Log transaction).
-        
-        booking.displayBookingDetails(); // Ryan: Final booking confirmation.
-        System.out.println("Thank you for booking with us, " + user.getName() + "!");
+        outputWriter.println("Thank you for booking with us, " + user.getName() + "!");
+    }
+
+    public static void main(String[] args) {
+        // --- Dependency Injection / Wiring up the application ---
+        InputReader inputReader = new ConsoleInputReader();
+        OutputWriter outputWriter = new ConsoleOutputWriter();
+
+        // Initializing managers with some dummy data
+        List<Flight> initialFlights = new ArrayList<>(Arrays.asList(
+            new Flight("SA101", "Nairobi", "Cape Town", 120.50),
+            new Flight("KQ202", "Nairobi", "London", 900.00),
+            new Flight("ET303", "Nairobi", "Addis Ababa", 110.75)
+        ));
+
+        AircraftManager aircraftManager = new SimpleAircraftManager();
+        AirportManager airportManager = new SimpleAirportManager();
+        FlightManager flightManager = new SimpleFlightManager(initialFlights);
+        DefaultPaymentService paymentService = new DefaultPaymentService(); // Can be an interface too
+
+        // Inject all dependencies into the main application class
+        PlaneBookingSystem app = new PlaneBookingSystem(
+            inputReader, outputWriter,
+            aircraftManager, airportManager,
+            flightManager, paymentService
+        );
+
+        // Run the application
+        app.run();
     }
 }
