@@ -1,9 +1,9 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
-import javax.swing.table.DefaultTableCellRenderer; // Added import
-import javax.swing.SwingConstants; // Added import
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.SwingConstants;
 import java.awt.*;
-import java.sql.Date; // Still using java.sql.Date as in your original code
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
@@ -65,7 +65,6 @@ interface PaymentProcessor {
 // --- New Classes for User details (Passport and Visa) ---
 class Passport {
     private String passportNumber;
-    // Add other relevant passport fields as needed (e.g., expiryDate, issueDate, countryOfIssue)
 
     public Passport(String passportNumber) {
         this.passportNumber = passportNumber;
@@ -83,7 +82,6 @@ class Passport {
 
 class Visa {
     private String visaNumber;
-    // Add other relevant visa fields as needed (e.g., expiryDate, type, countryOfIssue)
 
     public Visa(String visaNumber) {
         this.visaNumber = visaNumber;
@@ -102,7 +100,7 @@ class Visa {
 // --- 2. Concrete Implementations (Low-level Modules) ---
 
 abstract class Person implements PersonDetails {
-    protected String name, email, phoneNumber; // phoneNumber for contact, not necessarily passport
+    protected String name, email, phoneNumber;
 
     public Person(String name, String email, String phoneNumber) {
         this.name = name;
@@ -115,7 +113,7 @@ abstract class Person implements PersonDetails {
     @Override
     public String getEmail() { return email; }
     @Override
-    public String getPhoneNumber() { return phoneNumber; } // This is for general contact phone number
+    public String getPhoneNumber() { return phoneNumber; }
     @Override
     public abstract String getRoleDescription();
 }
@@ -123,30 +121,29 @@ abstract class Person implements PersonDetails {
 class User extends Person {
     private String dob; // Date of Birth as String (YYYY-MM-DD)
     private String nationality;
-    private Passport passport; // Now holds a Passport object
-    private Visa visa; // Now holds a Visa object
+    private Passport passport;
+    private Visa visa;
 
-    // Original constructor used by GUI (assuming it doesn't need full passport/visa initially)
+    // Constructor for GUI/basic interaction (without full document details)
     public User(String name, String email, String phoneNumber) {
-        super(name, email, phoneNumber); // phoneNumber is a contact number
-        this.dob = null;
+        super(name, email, phoneNumber); // phoneNumber here is the contact number
+        this.dob = null; // These will be null unless explicitly set via another constructor or setter
         this.nationality = null;
-        this.passport = null; // No passport object initially
-        this.visa = null; // No visa object initially
+        this.passport = null;
+        this.visa = null;
     }
 
-    // New constructor for creating User with full details, possibly from database or comprehensive input
+    // Constructor for loading from database or detailed input
     public User(String name, String dob, String nationality, Passport passport, Visa visa, String email) {
-        super(name, email, null); // Pass null for phone number from person if it's explicitly tied to passport now for DB.
-                                  // Or, if email is always the key, no problem. Let's make it more flexible.
-                                  // For the purpose of the DB, the passport number will be fetched from the Passport object.
+        super(name, email, null); // phoneNumber is null, assume email is unique identifier for this constructor
         this.dob = dob;
         this.nationality = nationality;
         this.passport = passport;
         this.visa = visa;
+        // If phone number is also part of DB user, it needs to be passed here too.
+        // For simplicity, sticking to the email as primary contact in the super call.
     }
 
-    // New getters for DOB, Nationality, Visa Number, and Passport Number
     public String getDOB() {
         return dob;
     }
@@ -159,7 +156,6 @@ class User extends Person {
         return (visa != null) ? visa.getVisaNumber() : null;
     }
 
-    // This method is crucial for DatabaseManager to get the passport number
     public String getPassportNumber() {
         return (passport != null) ? passport.getPassportNumber() : null;
     }
@@ -220,7 +216,6 @@ class Airport implements IdentifiableEntity {
     private String name, iataCode, icaoCode, city, country;
     private int numberOfTerminals, numberOfRunways;
     private double latitude, longitude;
-    private List<String> flightNumbersServed = new ArrayList<>();
 
     public Airport(String name, String iata, String icao, String city, String country, int term, int runs, double lat, double lon) {
         this.name = name;
@@ -244,7 +239,6 @@ class Airport implements IdentifiableEntity {
     public int getNumberOfRunways() { return numberOfRunways; }
     public double getLatitude() { return latitude; }
     public double getLongitude() { return longitude; }
-
 
     @Override
     public String toString() {
@@ -474,7 +468,7 @@ class GUITextFieldReader implements InputReader {
 
     @Override
     public void close() {
-        // Not applicable
+        // Not applicable for this simple GUI reader
     }
 }
 
@@ -583,23 +577,15 @@ class SimpleFlightManager implements FlightManager {
 
     @Override
     public Flight selectFlight(InputReader reader, OutputWriter writer) {
+        // This method is designed for console, but in GUI, the flight is selected directly from table.
+        // It's kept for interface compatibility but its implementation might not be directly used.
         writer.println("This selectFlight method is not used directly in GUI interaction for selecting a flight.");
         return null;
     }
 
     @Override
     public boolean bookSeat(Flight flight, String seatId, OutputWriter writer) {
-        if (!flight.isSeatValid(seatId)) {
-            writer.println("Error: Invalid seat format or seat out of bounds.");
-            return false;
-        }
-        if (flight.bookSeat(seatId)) {
-            writer.println("Seat " + seatId + " booked successfully for flight " + flight.getFlightNumber() + ".");
-            return true;
-        } else {
-            writer.println("Error: Seat " + seatId + " is already booked for flight " + flight.getFlightNumber() + ".");
-            return false;
-        }
+        return flight.bookSeat(seatId);
     }
 }
 
@@ -608,6 +594,7 @@ class DefaultPaymentService {
 
     public void initiatePayment(Booking booking, InputReader reader, OutputWriter writer) {
         writer.println("\n--- Payment Initiation ---");
+        // In GUI, this method is called after the PaymentDialog handles user input.
     }
 
     public PaymentProcessor createCashPayment(double amount) {
@@ -632,7 +619,7 @@ class SeatTableCellRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
-        label.setHorizontalAlignment(SwingConstants.CENTER); // Use SwingConstants.CENTER
+        label.setHorizontalAlignment(SwingConstants.CENTER);
         label.setOpaque(true);
 
         if (currentFlight == null) {
@@ -661,6 +648,7 @@ class SeatTableCellRenderer extends DefaultTableCellRenderer {
     }
 }
 
+// Payment Dialog for GUI
 class PaymentDialog extends JDialog {
     private String paymentMethodChoice = "";
     private JTextField cardNumberField;
@@ -776,7 +764,7 @@ class PaymentDialog extends JDialog {
 }
 
 
-public class DatabaseManager extends JFrame {
+public class PlaneBookingSystemGUI extends JFrame {
     private CardLayout cardLayout = new CardLayout();
     private JPanel mainPanel = new JPanel(cardLayout);
 
@@ -804,7 +792,7 @@ public class DatabaseManager extends JFrame {
     private DefaultTableModel flightTableModel;
     private JButton selectFlightButton, bookSeatButton;
     private JTable seatMapTable;
-    private DefaultTableModel seatMapTableModel; // Declared here
+    private DefaultTableModel seatMapTableModel; // Correctly declared here
     private SeatTableCellRenderer seatMapRenderer;
     private JTextField selectedSeatField;
 
@@ -820,7 +808,7 @@ public class DatabaseManager extends JFrame {
 
     private Flight currentlySelectedFlight = null;
 
-    public DatabaseManager(InputReader inputReader, OutputWriter outputWriter,
+    public PlaneBookingSystemGUI(InputReader inputReader, OutputWriter outputWriter,
                                  AircraftManager aircraftManager, AirportManager airportManager,
                                  FlightManager flightManager, DefaultPaymentService paymentService) {
         this.inputReader = inputReader;
@@ -1286,7 +1274,6 @@ public class DatabaseManager extends JFrame {
         bookSeatButton.setEnabled(false);
     }
 
-
     private void bookSeat() {
         if (currentlySelectedFlight == null) {
             JOptionPane.showMessageDialog(this, "Please select a flight first.", "Booking Error", JOptionPane.ERROR_MESSAGE);
@@ -1318,15 +1305,8 @@ public class DatabaseManager extends JFrame {
             return;
         }
 
-        // For booking, we use the simpler User constructor initially.
-        // If DB integration requires DOB/Nationality/Passport/Visa, these fields need to be collected in the GUI too.
-        // For now, let's create a User object with minimal details for booking, but the DB will need more.
-        User passenger = new User(userName, userEmail, userPhone); // This is the simple GUI user
-
-        // NOTE: If you intend to use DatabaseManager.saveUser, you need to collect
-        // DOB, Nationality, Passport, Visa details from the GUI and create the User
-        // object using the richer constructor:
-        // User passengerWithFullDetails = new User(userName, dob, nationality, new Passport(passportNum), new Visa(visaNum), userEmail);
+        // Create a basic User object for the booking flow
+        User passenger = new User(userName, userEmail, userPhone);
 
         Booking booking = new Booking(passenger, currentlySelectedFlight, seatId);
 
@@ -1408,7 +1388,7 @@ public class DatabaseManager extends JFrame {
 
             DefaultPaymentService paymentSvc = new DefaultPaymentService();
 
-            DatabaseManager app = new DatabaseManager(dummyReader, guiWriter,
+            PlaneBookingSystemGUI app = new PlaneBookingSystemGUI(dummyReader, guiWriter,
                     aircraftMgr, airportMgr, flightMgr, paymentSvc);
             app.setVisible(true);
         });
