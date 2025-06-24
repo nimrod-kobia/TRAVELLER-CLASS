@@ -8,19 +8,19 @@ public class FlightOptions {
     }
 
     private void loadFlightsFromDatabase() {
-        // Simulating a database - you can replace this with actual DB fetch later
+        // Simulating a database 
         flights = new Flight[] {
-            new Flight("SA101", "Cape Town", 120.50),
-            new Flight("SA202", "Durban", 99.99),
-            new Flight("SA303", "Johannesburg", 150.75),
-            new Flight("SA404", "Port Elizabeth", 80.00)
+            new Flight("SA101", "Cape Town", null, 120.50),
+            new Flight("SA202", "Durban", null, 99.99),
+            new Flight("SA303", "Johannesburg", null, 150.75),
+            new Flight("SA404", "Port Elizabeth", null, 80.00)
         };
     }
 
     public void displayAllFlights() {
         System.out.println("Available Flights:");
         for (Flight flight : flights) {
-            flight.displayInfo();
+            flight.displayInfo(null);
         }
     }
 
@@ -47,7 +47,7 @@ public class FlightOptions {
 
         if (selectedFlight != null) {
             System.out.println("\nYou have selected:");
-            selectedFlight.displayInfo();
+            selectedFlight.displayInfo(null);
         }
 
         scanner.close();

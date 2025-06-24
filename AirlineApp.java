@@ -24,8 +24,7 @@ interface AirlineService {
     AirlineInfo createAirline(int id, String name, String code, String headquarters, String contact, String website);
 }
 
-// S - Single Responsibility Principle (SRP): This class is solely responsible for
-// representing an Airlines entity and providing its details.
+// S - Single Responsibility Principle (SRP): This class is solely responsible for representing an Airlines entity and providing its details.
 class Airlines implements AirlineInfo {
     private Integer airlineId;
     private String airlineName;

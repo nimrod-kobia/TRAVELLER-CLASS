@@ -62,7 +62,7 @@ interface PaymentProcessor {
     void processPayment(Booking booking, InputReader reader, OutputWriter writer);
 }
 
-// --- New Classes for User details (Passport and Visa) ---
+//New Classes for User details (Passport and Visa)
 class Passport {
     private String passportNumber;
     // Add other relevant passport fields as needed (e.g., expiryDate, issueDate, countryOfIssue)
@@ -99,7 +99,7 @@ class Visa {
     }
 }
 
-// --- 2. Concrete Implementations (Low-level Modules) ---
+//2. Concrete Implementations
 
 abstract class Person implements PersonDetails {
     protected String name, email, phoneNumber; // phoneNumber for contact, not necessarily passport
@@ -137,9 +137,7 @@ class User extends Person {
 
     // New constructor for creating User with full details, possibly from database or comprehensive input
     public User(String name, String dob, String nationality, Passport passport, Visa visa, String email) {
-        super(name, email, null); // Pass null for phone number from person if it's explicitly tied to passport now for DB.
-                                  // Or, if email is always the key, no problem. Let's make it more flexible.
-                                  // For the purpose of the DB, the passport number will be fetched from the Passport object.
+        super(name, email, null); 
         this.dob = dob;
         this.nationality = nationality;
         this.passport = passport;

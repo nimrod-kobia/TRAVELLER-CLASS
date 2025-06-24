@@ -10,7 +10,7 @@ import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
 
-// --- 1. Interfaces for Abstraction (ISP & DIP) ---
+// Interfaces
 interface IdentifiableEntity {
     String getID();
 }
