@@ -578,7 +578,6 @@ class SimpleFlightManager implements FlightManager {
     @Override
     public Flight selectFlight(InputReader reader, OutputWriter writer) {
         // This method is designed for console, but in GUI, the flight is selected directly from table.
-        // It's kept for interface compatibility but its implementation might not be directly used.
         writer.println("This selectFlight method is not used directly in GUI interaction for selecting a flight.");
         return null;
     }
@@ -593,7 +592,7 @@ class DefaultPaymentService {
     private static int nextPaymentId = 1;
 
     public void initiatePayment(Booking booking, InputReader reader, OutputWriter writer) {
-        writer.println("\n--- Payment Initiation ---");
+        writer.println("\nPayment Initiation");
         // In GUI, this method is called after the PaymentDialog handles user input.
     }
 
@@ -792,7 +791,7 @@ public class PlaneBookingSystemGUI extends JFrame {
     private DefaultTableModel flightTableModel;
     private JButton selectFlightButton, bookSeatButton;
     private JTable seatMapTable;
-    private DefaultTableModel seatMapTableModel; // Correctly declared here
+    private DefaultTableModel seatMapTableModel;
     private SeatTableCellRenderer seatMapRenderer;
     private JTextField selectedSeatField;
 
@@ -809,8 +808,8 @@ public class PlaneBookingSystemGUI extends JFrame {
     private Flight currentlySelectedFlight = null;
 
     public PlaneBookingSystemGUI(InputReader inputReader, OutputWriter outputWriter,
-                                 AircraftManager aircraftManager, AirportManager airportManager,
-                                 FlightManager flightManager, DefaultPaymentService paymentService) {
+        AircraftManager aircraftManager, AirportManager airportManager,FlightManager flightManager, DefaultPaymentService paymentService) 
+        {
         this.inputReader = inputReader;
         this.guiOutputWriter = (GUITextAreaWriter) outputWriter;
         this.aircraftManager = aircraftManager;
