@@ -75,7 +75,9 @@ interface PaymentProcessor {
 // S - Single Responsibility: Focuses on Person attributes.
 // L - Liskov Substitution: User will extend this correctly.
 abstract class Person implements PersonDetails {
-    protected String name, email, phoneNumber;
+    protected String name;
+    protected static String email;
+    protected static String phoneNumber;
 
     public Person(String name, String email, String phoneNumber) {
         this.name = name;
@@ -99,12 +101,44 @@ class User extends Person {
     // Note: The `Passport` and `Visa` objects are not part of `Person` or `User` fields in the given code,
     // so this constructor needs adjustment or fields added to User if they are to be stored.
     // For now, assuming dob, nationality are not stored here.
-    public User(String name, String email, String phoneNumber) {
+    public User(String name,String dobString,String nationality, Passport passport, Visa visa, String email) {
         super(name, email, phoneNumber);
+        this.dobString=dobString;
+        this.naString=nationality;
     }
-
+        private String naString;
+        private String passport;
+        private String visa;
+        private String dobString;
     @Override
     public String getRoleDescription() { return "Passenger"; }
+
+    public String getPhoneNumber(){
+        return phoneNumber;
+    }
+    public String getNaString(){
+        return naString;
+    }
+
+    public String getPassportNumber () {
+        // TODO Auto-generated method stub
+        return passport;
+    }
+
+    public String getVisaNumber() {
+        // TODO Auto-generated method stub
+        return visa;
+        }
+
+    public String getDOB() {
+        // TODO Auto-generated method stub
+        return dobString;
+    }
+
+    public String getNationality() {
+        // TODO Auto-generated method stub
+        return naString;
+    }
 }
 
 // S - Single Responsibility: Represents an aircraft's data.
@@ -689,9 +723,15 @@ public class PlaneBookingSystem {
         // Collect passenger details for User object.
         outputWriter.println("Please enter your details to proceed.");
         String name = inputReader.readLine("Enter full name: ");
+        String dob=inputReader.readLine("Whats your nationality: ");
+        String nation=inputReader.readLine("Whats your nationality: ");
+        String passport=inputReader.readLine("Enter passport number: ");
         String email = inputReader.readLine("Enter email: ");
         String phone = inputReader.readLine("Enter phone number: ");
-        User user = new User(name, email, phone);
+        String visa=inputReader.readLine("Whats your visa: ");
+        
+
+        User user = new User(name, nation, dob, null, null, email);
         outputWriter.println("Welcome, " + user.getName() + "!");
 
         flightManager.displayAvailableFlights(outputWriter);
