@@ -5,7 +5,7 @@ abstract class Payment {
     protected String bookingId;
     protected double amount;
     protected Date paymentDate;
-    protected String paymentMethod;  // Added this field
+    protected String paymentMethod;
     
     public Payment(int paymentId, String bookingId, double amount, Date paymentDate, String paymentMethod) {
         this.paymentId = paymentId;

@@ -1,15 +1,10 @@
 import java.util.Scanner;
-
-// --- Interfaces (Abstractions) ---
-
-// S - Single Responsibility Principle (SRP): This interface is solely responsible for defining
-// how to retrieve basic airline information as a formatted string.
+// S - Single Responsibility Principle (SRP): This interface is solely responsible for defining.
 interface AirlineInfo {
     String getAirlineDetails();
 }
 
 // S - Single Responsibility Principle (SRP): This interface is for managing user input.
-// This separates input concerns from the main application logic.
 interface InputHandler {
     String promptForString(String message);
     int promptForInt(String message);
@@ -17,24 +12,19 @@ interface InputHandler {
 }
 
 // S - Single Responsibility Principle (SRP): This interface is for handling output.
-// This separates output concerns from the main application logic.
+
 interface OutputHandler {
     void displayMessage(String message);
     void displayAirlineInfo(AirlineInfo airline);
 }
 
 // S - Single Responsibility Principle (SRP): This interface is for the core business logic of
-// providing airline data, abstracting how the airline object is created or fetched.
+
 interface AirlineService {
     AirlineInfo createAirline(int id, String name, String code, String headquarters, String contact, String website);
 }
 
-// --- Concrete Implementations ---
-
-// S - Single Responsibility Principle (SRP): This class is solely responsible for
-// representing an Airlines entity and providing its details.
-// Encapsulation: All fields are private and accessed through public methods.
-// Polymorphism: It overrides getAirlineDetails() from the AirlineInfo interface.
+// S - Single Responsibility Principle (SRP): This class is solely responsible for representing an Airlines entity and providing its details.
 class Airlines implements AirlineInfo {
     private Integer airlineId;
     private String airlineName;
@@ -85,7 +75,7 @@ class ConsoleInputHandler implements InputHandler {
     public int promptForInt(String message) {
         System.out.print(message);
         int value = scanner.nextInt();
-        scanner.nextLine(); // Consume newline
+        scanner.nextLine();
         return value;
     }
 

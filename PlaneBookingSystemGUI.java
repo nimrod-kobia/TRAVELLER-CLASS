@@ -1,15 +1,25 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableCellRenderer;
+<<<<<<< HEAD
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.sql.Date; // Still using java.sql.Date as in your original code
+=======
+import javax.swing.table.DefaultTableCellRenderer;
+import javax.swing.SwingConstants;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.sql.Date;
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
+<<<<<<< HEAD
 
 // --- 1. Interfaces for Abstraction (ISP & DIP) ---
 
@@ -24,6 +34,13 @@ interface AirlineInfo {
 }
 
 // S - Single Responsibility: Defines common person details.
+=======
+// import java.time.LocalDate; // Not needed after User simplification
+
+// --- 1. Interfaces for Abstraction (ISP & DIP) ---
+
+// Keeping core interfaces for good design principles
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 interface PersonDetails {
     String getName();
     String getEmail();
@@ -31,6 +48,7 @@ interface PersonDetails {
     String getRoleDescription();
 }
 
+<<<<<<< HEAD
 // S - Single Responsibility: Defines an interface for handling user input.
 // NOTE: For GUI, this interface becomes less about blocking prompts and more about providing
 // a mechanism to 'get' input after user interaction, or for mocking during tests.
@@ -43,12 +61,22 @@ interface InputReader {
 }
 
 // S - Single Responsibility: Defines an interface for handling output.
+=======
+interface InputReader {
+    String readLine(String prompt);
+    int readInt(String prompt);
+    double readDouble(String prompt);
+    void close();
+}
+
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 interface OutputWriter {
     void print(String message);
     void println(String message);
     void printf(String format, Object... args);
 }
 
+<<<<<<< HEAD
 // S - Single Responsibility: Defines a service for managing aircraft.
 // O - Open/Closed: New aircraft types can be handled by implementations.
 interface AircraftManager {
@@ -76,14 +104,26 @@ interface FlightManager {
 // S - Single Responsibility: Defines an interface for payment processing.
 // O - Open/Closed: New payment methods can be added by implementing this.
 // L - Liskov Substitution: Any PaymentProcessor can be used interchangeably.
+=======
+interface FlightManager {
+    List<Flight> getAvailableFlights();
+    void displayAvailableFlights(OutputWriter writer); // Can be used for console logs
+    boolean bookSeat(Flight flight, String seatId, OutputWriter writer);
+}
+
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 interface PaymentProcessor {
     void processPayment(Booking booking, InputReader reader, OutputWriter writer);
 }
 
 // --- 2. Concrete Implementations (Low-level Modules) ---
 
+<<<<<<< HEAD
 // S - Single Responsibility: Focuses on Person attributes.
 // L - Liskov Substitution: User will extend this correctly.
+=======
+// Simplified Person and User classes
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 abstract class Person implements PersonDetails {
     protected String name, email, phoneNumber;
 
@@ -103,14 +143,21 @@ abstract class Person implements PersonDetails {
     public abstract String getRoleDescription();
 }
 
+<<<<<<< HEAD
 // S - Single Responsibility: Represents a user/passenger.
 class User extends Person {
     public User(String name,String dobString,String phoneNumber, Passport passport, Visa visa,String email) {
+=======
+class User extends Person {
+    // Removed dob, nationality, Passport, Visa for simplification
+    public User(String name, String email, String phoneNumber) {
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         super(name, email, phoneNumber);
     }
 
     @Override
     public String getRoleDescription() { return "Passenger"; }
+<<<<<<< HEAD
 
     public String getVisaNumber() {
         return this.getVisaNumber();
@@ -221,6 +268,12 @@ class Airport implements IdentifiableEntity {
 }
 
 // S - Single Responsibility: Represents a flight booking.
+=======
+}
+
+// Removed Aircraft, Airlines, Airport classes as Admin Portal is removed.
+
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 class Booking {
     private static int idCounter = 1;
     private int bookingId;
@@ -235,7 +288,11 @@ class Booking {
         this.passenger = passenger;
         this.flightNumber = flight.getFlightNumber();
         this.seatId = seatId;
+<<<<<<< HEAD
         this.totalPrice = flight.getPrice(); // Price comes from the flight
+=======
+        this.totalPrice = flight.getPrice();
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         this.bookingTime = LocalDateTime.now();
     }
 
@@ -261,8 +318,12 @@ class Booking {
     public String getPaymentStatus() { return paymentStatus; }
 }
 
+<<<<<<< HEAD
 // S - Single Responsibility: Represents a flight with seat management.
 class Flight implements IdentifiableEntity {
+=======
+class Flight { // Removed IdentifiableEntity as it's no longer an interface after simplification
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     private String flightNumber, departureLocation, arrivalLocation;
     private double price;
     private Set<String> bookedSeats = new HashSet<>();
@@ -276,13 +337,17 @@ class Flight implements IdentifiableEntity {
         this.price = price;
     }
 
+<<<<<<< HEAD
     @Override
     public String getID() { return flightNumber; }
 
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     public void displayInfo(OutputWriter writer) {
         writer.printf("Flight: %s from %s to %s - Price: $%.2f%n", flightNumber, departureLocation, arrivalLocation, price);
     }
 
+<<<<<<< HEAD
     public void displayAvailableSeats(OutputWriter writer) {
         writer.println("Available Seats for Flight " + flightNumber + ":");
         for (int r = 1; r <= MAX_ROWS; r++) {
@@ -294,6 +359,8 @@ class Flight implements IdentifiableEntity {
         }
     }
 
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     public boolean isSeatValid(String seatId) {
         if (seatId == null || seatId.length() < 2) return false;
         try {
@@ -305,6 +372,7 @@ class Flight implements IdentifiableEntity {
         } catch (NumberFormatException e) { return false; }
     }
 
+<<<<<<< HEAD
     public boolean bookSeat(String seatId) {
         if (!isSeatValid(seatId)) {
             // In GUI, we'll use JOptionPane or update a JLabel instead of System.out
@@ -317,6 +385,19 @@ class Flight implements IdentifiableEntity {
         }
         bookedSeats.add(seatId);
         // System.out.println("Seat " + seatId + " booked successfully for flight " + flightNumber + ".");
+=======
+    public boolean bookSeat(String seatId, OutputWriter writer) {
+        if (!isSeatValid(seatId)) {
+            writer.println("Error: Invalid seat format or out of bounds.");
+            return false;
+        }
+        if (bookedSeats.contains(seatId)) {
+            writer.println("Error: Seat " + seatId + " is already booked.");
+            return false;
+        }
+        bookedSeats.add(seatId);
+        writer.println("Seat " + seatId + " booked successfully for flight " + flightNumber + ".");
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         return true;
     }
 
@@ -324,7 +405,11 @@ class Flight implements IdentifiableEntity {
     public double getPrice() { return price; }
     public String getArrivalLocation() { return arrivalLocation; }
     public String getDepartureLocation() { return departureLocation; }
+<<<<<<< HEAD
     public Set<String> getBookedSeats() { return Collections.unmodifiableSet(bookedSeats); } // Return unmodifiable set
+=======
+    public Set<String> getBookedSeats() { return Collections.unmodifiableSet(bookedSeats); }
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     public static int getMaxRows() { return MAX_ROWS; }
     public static char[] getSeatLetters() { return SEAT_LETTERS; }
 
@@ -334,7 +419,10 @@ class Flight implements IdentifiableEntity {
     }
 }
 
+<<<<<<< HEAD
 // S - Single Responsibility: Abstract base for payment processing.
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 abstract class AbstractPayment implements PaymentProcessor {
     protected int paymentId;
     protected double amount;
@@ -363,7 +451,10 @@ abstract class AbstractPayment implements PaymentProcessor {
     }
 }
 
+<<<<<<< HEAD
 // S - Single Responsibility: Handles cash payments.
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 class CashPayment extends AbstractPayment {
     public CashPayment(int pId, double amt, Date date) {
         super(pId, amt, "Cash", date);
@@ -383,7 +474,10 @@ class CashPayment extends AbstractPayment {
     }
 }
 
+<<<<<<< HEAD
 // S - Single Responsibility: Handles card payments.
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 class CardPayment extends AbstractPayment {
     private String cardNumber, expiryDate, cvv;
 
@@ -396,11 +490,18 @@ class CardPayment extends AbstractPayment {
 
     @Override
     protected boolean validatePaymentDetails() {
+<<<<<<< HEAD
         // Extended validation for card details
         return super.validatePaymentDetails() &&
                 cardNumber != null && Pattern.matches("\d{16}", cardNumber) &&
                 expiryDate != null && Pattern.matches("\d{2}/\d{2}", expiryDate) &&
                 cvv != null && Pattern.matches("\d{3}", cvv);
+=======
+        return super.validatePaymentDetails() &&
+                cardNumber != null && Pattern.matches("\\d{16}", cardNumber) &&
+                expiryDate != null && Pattern.matches("\\d{2}/\\d{2}", expiryDate) &&
+                cvv != null && Pattern.matches("\\d{3}", cvv);
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     }
 
     @Override
@@ -412,14 +513,21 @@ class CardPayment extends AbstractPayment {
             booking.setPaymentStatus("Paid");
         } else {
             writer.println("Card payment validation failed for booking ID " + booking.getBookingId() + ".");
+<<<<<<< HEAD
             writer.println("Card details provided: " + (cardNumber != null ? "Card#: " + cardNumber.replaceAll("\d(?=\d{4})", "*") : "N/A") +
+=======
+            writer.println("Card details provided: " + (cardNumber != null ? "Card#: " + cardNumber.replaceAll("\\d(?=\\d{4})", "*") : "N/A") +
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
                     ", Expiry: " + expiryDate + ", CVV: " + (cvv != null ? "***" : "N/A"));
             booking.setPaymentStatus("Failed");
         }
     }
 }
 
+<<<<<<< HEAD
 // GUI-specific InputReader (simplified, as GUI uses direct component access more)
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 class GUITextFieldReader implements InputReader {
     private JTextField textField;
 
@@ -429,9 +537,12 @@ class GUITextFieldReader implements InputReader {
 
     @Override
     public String readLine(String prompt) {
+<<<<<<< HEAD
         // In a real GUI, this would typically involve a modal dialog or pre-filled field.
         // For simplicity, we'll just return the current text field value.
         // This makes it unsuitable for sequential prompts unless managed externally.
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         return textField.getText();
     }
 
@@ -440,7 +551,11 @@ class GUITextFieldReader implements InputReader {
         try {
             return Integer.parseInt(textField.getText());
         } catch (NumberFormatException e) {
+<<<<<<< HEAD
             return -1; // Indicate error
+=======
+            return -1;
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         }
     }
 
@@ -449,7 +564,11 @@ class GUITextFieldReader implements InputReader {
         try {
             return Double.parseDouble(textField.getText());
         } catch (NumberFormatException e) {
+<<<<<<< HEAD
             return -1.0; // Indicate error
+=======
+            return -1.0;
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         }
     }
 
@@ -459,6 +578,7 @@ class GUITextFieldReader implements InputReader {
     }
 }
 
+<<<<<<< HEAD
 // GUI-specific OutputWriter that writes to a JTextArea
 class GUITextAreaWriter implements OutputWriter {
     private JTextArea textArea;
@@ -470,21 +590,36 @@ class GUITextAreaWriter implements OutputWriter {
     @Override
     public void print(String message) {
         SwingUtilities.invokeLater(() -> textArea.append(message));
+=======
+class ConsoleOutputWriter implements OutputWriter {
+    @Override
+    public void print(String message) {
+        System.out.print(message);
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     }
 
     @Override
     public void println(String message) {
+<<<<<<< HEAD
         SwingUtilities.invokeLater(() -> textArea.append(message + "\n"));
+=======
+        System.out.println(message);
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     }
 
     @Override
     public void printf(String format, Object... args) {
+<<<<<<< HEAD
         SwingUtilities.invokeLater(() -> textArea.append(String.format(format, args)));
+=======
+        System.out.printf(format, args);
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     }
 }
 
 // --- 3. Service Layer (High-level Modules) ---
 
+<<<<<<< HEAD
 // S - Single Responsibility: Manages aircraft data and operations.
 class SimpleAircraftManager implements AircraftManager {
     private List<Aircraft> aircraftFleet = new ArrayList<>();
@@ -541,6 +676,8 @@ class SimpleAirportManager implements AirportManager {
 }
 
 // S - Single Responsibility: Manages flight data and operations.
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 class SimpleFlightManager implements FlightManager {
     private List<Flight> availableFlights;
 
@@ -550,7 +687,11 @@ class SimpleFlightManager implements FlightManager {
 
     @Override
     public List<Flight> getAvailableFlights() {
+<<<<<<< HEAD
         return Collections.unmodifiableList(availableFlights); // Return unmodifiable list for safety
+=======
+        return Collections.unmodifiableList(availableFlights);
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     }
 
     @Override
@@ -568,16 +709,21 @@ class SimpleFlightManager implements FlightManager {
 
     @Override
     public Flight selectFlight(InputReader reader, OutputWriter writer) {
+<<<<<<< HEAD
         // In GUI context, this method needs to be handled differently.
         // The GUI will likely present a table/list and the selection happens via an event.
         // This method will now simply return null or be unused for direct selection.
         // The GUI will pass the selected Flight object directly.
         writer.println("This selectFlight method is not used directly in GUI interaction for selecting a flight.");
         return null;
+=======
+        return null; // Not used in GUI direct selection flow
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     }
 
     @Override
     public boolean bookSeat(Flight flight, String seatId, OutputWriter writer) {
+<<<<<<< HEAD
         if (!flight.isSeatValid(seatId)) {
             writer.println("Error: Invalid seat format or seat out of bounds.");
             return false;
@@ -605,6 +751,17 @@ class DefaultPaymentService {
         // For GUI, the payment details are collected through a dialog outside this call
         // and passed in or handled by a GUI-specific PaymentProcessor setup.
         // The actual processPayment will then be called.
+=======
+        return flight.bookSeat(seatId, writer);
+    }
+}
+
+class DefaultPaymentService {
+    private static int nextPaymentId = 1;
+
+    public void initiatePayment(Booking booking, InputReader reader, OutputWriter writer) {
+        writer.println("\n--- Payment Initiation ---");
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     }
 
     public PaymentProcessor createCashPayment(double amount) {
@@ -616,9 +773,12 @@ class DefaultPaymentService {
     }
 }
 
+<<<<<<< HEAD
 
 // --- 4. Main Application GUI (High-level Orchestrator and View) ---
 
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 // Custom Cell Renderer for JTable to color seats
 class SeatTableCellRenderer extends DefaultTableCellRenderer {
     private Set<String> bookedSeats;
@@ -632,7 +792,11 @@ class SeatTableCellRenderer extends DefaultTableCellRenderer {
     @Override
     public Component getTableCellRendererComponent(JTable table, Object value, boolean isSelected, boolean hasFocus, int row, int column) {
         JLabel label = (JLabel) super.getTableCellRendererComponent(table, value, isSelected, hasFocus, row, column);
+<<<<<<< HEAD
         label.setHorizontalAlignment(CENTER);
+=======
+        label.setHorizontalAlignment(SwingConstants.CENTER);
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         label.setOpaque(true);
 
         if (currentFlight == null) {
@@ -641,7 +805,11 @@ class SeatTableCellRenderer extends DefaultTableCellRenderer {
             return label;
         }
 
+<<<<<<< HEAD
         int seatRow = row + 1; // Table row 0 corresponds to seat row 1
+=======
+        int seatRow = row + 1;
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         char seatLetter = Flight.getSeatLetters()[column];
         String seatId = seatRow + "" + seatLetter;
 
@@ -654,7 +822,11 @@ class SeatTableCellRenderer extends DefaultTableCellRenderer {
         }
 
         if (isSelected) {
+<<<<<<< HEAD
             label.setBackground(label.getBackground().darker()); // Darken selected seat
+=======
+            label.setBackground(label.getBackground().darker());
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         }
 
         return label;
@@ -670,7 +842,11 @@ class PaymentDialog extends JDialog {
     private boolean paymentConfirmed = false;
 
     public PaymentDialog(JFrame parent, double amount) {
+<<<<<<< HEAD
         super(parent, "Process Payment for $" + String.format("%.2f", amount), true); // Modal dialog
+=======
+        super(parent, "Process Payment for $" + String.format("%.2f", amount), true);
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         setLayout(new BorderLayout(10, 10));
         setSize(400, 300);
         setLocationRelativeTo(parent);
@@ -690,7 +866,11 @@ class PaymentDialog extends JDialog {
         ButtonGroup group = new ButtonGroup();
         group.add(cashRadio);
         group.add(cardRadio);
+<<<<<<< HEAD
         cashRadio.setSelected(true); // Default selection
+=======
+        cashRadio.setSelected(true);
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         paymentMethodChoice = "Cash";
 
         JPanel radioPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 20, 5));
@@ -700,7 +880,10 @@ class PaymentDialog extends JDialog {
         gbc.gridy = 1;
         mainPanel.add(radioPanel, gbc);
 
+<<<<<<< HEAD
         // Card details fields
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         cardNumberField = new JTextField(16);
         expiryDateField = new JTextField(5);
         cvvField = new JTextField(3);
@@ -719,7 +902,10 @@ class PaymentDialog extends JDialog {
         gbc.gridx = 0; gbc.gridy = 4; mainPanel.add(cvvLabel, gbc);
         gbc.gridx = 1; mainPanel.add(cvvField, gbc);
 
+<<<<<<< HEAD
         // Initially disable card fields if Cash is selected
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         setCardFieldsEnabled(false);
 
         cashRadio.addActionListener(e -> {
@@ -734,13 +920,21 @@ class PaymentDialog extends JDialog {
         JButton payButton = new JButton("Pay Now");
         payButton.addActionListener(e -> {
             paymentConfirmed = true;
+<<<<<<< HEAD
             dispose(); // Close dialog
+=======
+            dispose();
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         });
 
         JButton cancelButton = new JButton("Cancel");
         cancelButton.addActionListener(e -> {
             paymentConfirmed = false;
+<<<<<<< HEAD
             dispose(); // Close dialog
+=======
+            dispose();
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         });
 
         JPanel buttonPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
@@ -786,6 +980,7 @@ public class PlaneBookingSystemGUI extends JFrame {
     // --- Components for Main Menu / Role Selection ---
     private JPanel roleSelectionPanel;
 
+<<<<<<< HEAD
     // --- Components for Admin Portal ---
     private JPanel adminPanel;
     private JTextField adminAirportNameField, adminAirportIataField, adminAirportIcaoField, adminAirportCityField, adminAirportCountryField;
@@ -800,6 +995,8 @@ public class PlaneBookingSystemGUI extends JFrame {
     private JTable aircraftTable;
     private DefaultTableModel aircraftTableModel;
 
+=======
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     // --- Components for User Portal ---
     private JPanel userPanel;
     private JTextField userNameField, userEmailField, userPhoneField;
@@ -807,6 +1004,7 @@ public class PlaneBookingSystemGUI extends JFrame {
     private DefaultTableModel flightTableModel;
     private JButton selectFlightButton, bookSeatButton;
     private JTable seatMapTable;
+<<<<<<< HEAD
     private SeatTableCellRenderer seatMapRenderer;
     private JTextField selectedSeatField;
 
@@ -819,22 +1017,40 @@ public class PlaneBookingSystemGUI extends JFrame {
     private AirportManager airportManager;
     private FlightManager flightManager;
     private DefaultPaymentService paymentService;
+=======
+    private DefaultTableModel seatMapTableModel;
+    private SeatTableCellRenderer seatMapRenderer;
+    private JTextField selectedSeatField;
+
+    // --- Dependencies ---
+    private InputReader inputReader;
+    private FlightManager flightManager;
+    private DefaultPaymentService paymentService;
+    private OutputWriter consoleOutputWriter; // For logging to console
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
 
     private Flight currentlySelectedFlight = null;
 
     public PlaneBookingSystemGUI(InputReader inputReader, OutputWriter outputWriter,
+<<<<<<< HEAD
                                  AircraftManager aircraftManager, AirportManager airportManager,
                                  FlightManager flightManager, DefaultPaymentService paymentService) {
         this.inputReader = inputReader; // Mostly for legacy API calls that expect it
         this.guiOutputWriter = (GUITextAreaWriter) outputWriter; // Cast to our GUI writer
         this.aircraftManager = aircraftManager;
         this.airportManager = airportManager;
+=======
+                                 FlightManager flightManager, DefaultPaymentService paymentService) {
+        this.inputReader = inputReader;
+        this.consoleOutputWriter = outputWriter; // Assign to the console writer
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         this.flightManager = flightManager;
         this.paymentService = paymentService;
 
         setTitle("Plane Booking System");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+<<<<<<< HEAD
         setLocationRelativeTo(null); // Center the window
 
         setupUI();
@@ -864,10 +1080,32 @@ public class PlaneBookingSystemGUI extends JFrame {
         add(scrollPane, BorderLayout.SOUTH);
 
         cardLayout.show(mainPanel, "ROLE_SELECTION"); // Show initial role selection
+=======
+        setLocationRelativeTo(null);
+
+        setupUI();
+        addDummyData(); // Add dummy flights only
+        refreshFlightTable();
+    }
+
+    private void setupUI() {
+        setupRoleSelectionPanel();
+        setupUserPanel(); // Only user panel now
+
+        mainPanel.add(roleSelectionPanel, "ROLE_SELECTION");
+        mainPanel.add(userPanel, "USER_PORTAL");
+
+        // The "System Output" JTextArea and JScrollPane are completely removed.
+        // The mainPanel now takes up the entire center space of the JFrame.
+        add(mainPanel, BorderLayout.CENTER);
+
+        cardLayout.show(mainPanel, "ROLE_SELECTION");
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
     }
 
     private void setupRoleSelectionPanel() {
         roleSelectionPanel = new JPanel(new GridBagLayout());
+<<<<<<< HEAD
         roleSelectionPanel.setBackground(new Color(230, 240, 250));
         GridBagConstraints gbc = new GridBagConstraints();
         gbc.insets = new Insets(15, 15, 15, 15);
@@ -1235,6 +1473,149 @@ public class PlaneBookingSystemGUI extends JFrame {
 
     private void refreshFlightTable() {
         flightTableModel.setRowCount(0); // Clear existing data
+=======
+        GridBagConstraints gbc = new GridBagConstraints();
+        gbc.insets = new Insets(10, 10, 10, 10);
+        gbc.gridx = 0;
+        gbc.gridy = 0;
+        gbc.anchor = GridBagConstraints.CENTER;
+
+        JLabel titleLabel = new JLabel("Welcome to Plane Booking System");
+        titleLabel.setFont(new Font("Serif", Font.BOLD, 24));
+        gbc.gridwidth = 2;
+        roleSelectionPanel.add(titleLabel, gbc);
+
+        JButton userButton = new JButton("Start Booking (User Portal)");
+        userButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        userButton.setPreferredSize(new Dimension(250, 60)); // Make it larger and central
+        gbc.gridx = 0; // Center it
+        gbc.gridy = 1; // Align under title
+        roleSelectionPanel.add(userButton, gbc);
+
+        userButton.addActionListener(e -> cardLayout.show(mainPanel, "USER_PORTAL"));
+    }
+
+    private void setupUserPanel() {
+        userPanel = new JPanel(new BorderLayout(10, 10));
+
+        JPanel userDetailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        userDetailsPanel.setBorder(BorderFactory.createTitledBorder("Passenger Details"));
+        userNameField = new JTextField(15);
+        userEmailField = new JTextField(15);
+        userPhoneField = new JTextField(15);
+        userDetailsPanel.add(new JLabel("Name:"));
+        userDetailsPanel.add(userNameField);
+        userDetailsPanel.add(new JLabel("Email:"));
+        userDetailsPanel.add(userEmailField);
+        userDetailsPanel.add(new JLabel("Phone:"));
+        userDetailsPanel.add(userPhoneField);
+        userPanel.add(userDetailsPanel, BorderLayout.NORTH);
+
+        JPanel flightSelectionPanel = new JPanel(new BorderLayout());
+        flightSelectionPanel.setBorder(BorderFactory.createTitledBorder("Available Flights"));
+        flightTableModel = new DefaultTableModel(new Object[]{"Flight Number", "Departure", "Arrival", "Price"}, 0);
+        flightTable = new JTable(flightTableModel);
+        flightTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        flightTable.setFillsViewportHeight(true);
+        flightTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting()) {
+                int selectedRow = flightTable.getSelectedRow();
+                if (selectedRow != -1) {
+                    currentlySelectedFlight = flightManager.getAvailableFlights().get(selectedRow);
+                    selectFlightButton.setEnabled(true);
+                    updateSeatMap();
+                } else {
+                    currentlySelectedFlight = null;
+                    selectFlightButton.setEnabled(false);
+                    clearSeatMap();
+                }
+            }
+        });
+        JScrollPane flightTableScrollPane = new JScrollPane(flightTable);
+        flightSelectionPanel.add(flightTableScrollPane, BorderLayout.CENTER);
+
+        JPanel flightButtonsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        selectFlightButton = new JButton("Select This Flight");
+        selectFlightButton.setEnabled(false);
+        selectFlightButton.addActionListener(e -> {
+            if (currentlySelectedFlight != null) {
+                JOptionPane.showMessageDialog(this, "You have selected Flight: " + currentlySelectedFlight.getFlightNumber(), "Flight Selected", JOptionPane.INFORMATION_MESSAGE);
+            }
+        });
+        flightButtonsPanel.add(selectFlightButton);
+        flightSelectionPanel.add(flightButtonsPanel, BorderLayout.SOUTH);
+
+        JPanel seatMapPanel = new JPanel(new BorderLayout());
+        seatMapPanel.setBorder(BorderFactory.createTitledBorder("Select Your Seat (Green: Available, Red: Booked)"));
+        seatMapTableModel = new DefaultTableModel(Flight.getMaxRows(), Flight.getSeatLetters().length) {
+            @Override
+            public boolean isCellEditable(int row, int column) {
+                return false;
+            }
+        };
+        seatMapTable = new JTable(seatMapTableModel);
+        seatMapTable.setRowHeight(30);
+        seatMapTable.setCellSelectionEnabled(true);
+        seatMapTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+        seatMapTable.getTableHeader().setReorderingAllowed(false);
+
+        for (int i = 0; i < Flight.getSeatLetters().length; i++) {
+            seatMapTable.getColumnModel().getColumn(i).setHeaderValue(String.valueOf(Flight.getSeatLetters()[i]));
+        }
+
+        seatMapRenderer = new SeatTableCellRenderer();
+        for (int i = 0; i < seatMapTable.getColumnModel().getColumnCount(); i++) {
+            seatMapTable.getColumnModel().getColumn(i).setCellRenderer(seatMapRenderer);
+        }
+
+        seatMapTable.getSelectionModel().addListSelectionListener(e -> {
+            if (!e.getValueIsAdjusting() && currentlySelectedFlight != null) {
+                int selectedRow = seatMapTable.getSelectedRow();
+                int selectedCol = seatMapTable.getSelectedColumn();
+                if (selectedRow != -1 && selectedCol != -1) {
+                    int seatRow = selectedRow + 1;
+                    char seatLetter = Flight.getSeatLetters()[selectedCol];
+                    String selectedSeat = seatRow + "" + seatLetter;
+                    selectedSeatField.setText(selectedSeat);
+                    bookSeatButton.setEnabled(true);
+                } else {
+                    selectedSeatField.setText("");
+                    bookSeatButton.setEnabled(false);
+                }
+            }
+        });
+
+        JScrollPane seatMapScrollPane = new JScrollPane(seatMapTable);
+        seatMapPanel.add(seatMapScrollPane, BorderLayout.CENTER);
+
+        JPanel seatSelectionActionsPanel = new JPanel(new FlowLayout(FlowLayout.RIGHT));
+        selectedSeatField = new JTextField(8);
+        selectedSeatField.setEditable(false);
+        bookSeatButton = new JButton("Book Selected Seat");
+        bookSeatButton.setEnabled(false);
+
+        bookSeatButton.addActionListener(e -> bookSeat());
+
+        seatSelectionActionsPanel.add(new JLabel("Selected Seat:"));
+        seatSelectionActionsPanel.add(selectedSeatField);
+        seatSelectionActionsPanel.add(bookSeatButton);
+        seatMapPanel.add(seatSelectionActionsPanel, BorderLayout.SOUTH);
+
+        JSplitPane userSplitPane = new JSplitPane(JSplitPane.VERTICAL_SPLIT, flightSelectionPanel, seatMapPanel);
+        userSplitPane.setResizeWeight(0.5);
+
+        userPanel.add(userSplitPane, BorderLayout.CENTER);
+
+        JButton backButton = new JButton("Back to Role Selection");
+        backButton.addActionListener(e -> cardLayout.show(mainPanel, "ROLE_SELECTION"));
+        JPanel backButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
+        backButtonPanel.add(backButton);
+        userPanel.add(backButtonPanel, BorderLayout.SOUTH);
+    }
+
+    private void refreshFlightTable() {
+        flightTableModel.setRowCount(0);
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         for (Flight flight : flightManager.getAvailableFlights()) {
             flightTableModel.addRow(new Object[]{
                     flight.getFlightNumber(),
@@ -1243,6 +1624,7 @@ public class PlaneBookingSystemGUI extends JFrame {
                     String.format("$%.2f", flight.getPrice())
             });
         }
+<<<<<<< HEAD
     }
 
     private void updateSeatMap() {
@@ -1259,11 +1641,55 @@ public class PlaneBookingSystemGUI extends JFrame {
 
 
     private void bookFlightAndPay() {
+=======
+        currentlySelectedFlight = null;
+        selectFlightButton.setEnabled(false);
+        clearSeatMap();
+    }
+
+    private void updateSeatMap() {
+        seatMapRenderer.setFlight(currentlySelectedFlight);
+        seatMapTable.repaint();
+        seatMapTableModel.setRowCount(0);
+        seatMapTableModel.setColumnCount(Flight.getSeatLetters().length);
+        for (int i = 0; i < Flight.getMaxRows(); i++) {
+            Object[] rowData = new Object[Flight.getSeatLetters().length];
+            for (int j = 0; j < Flight.getSeatLetters().length; j++) {
+                rowData[j] = (i + 1) + "" + Flight.getSeatLetters()[j];
+            }
+            seatMapTableModel.addRow(rowData);
+        }
+    }
+
+    private void clearSeatMap() {
+        seatMapRenderer.setFlight(null);
+        seatMapTable.repaint();
+        seatMapTableModel.setRowCount(0);
+        seatMapTableModel.setColumnCount(0);
+        seatMapTableModel.setRowCount(Flight.getMaxRows());
+        seatMapTableModel.setColumnCount(Flight.getSeatLetters().length);
+        for (int i = 0; i < Flight.getSeatLetters().length; i++) {
+            seatMapTable.getColumnModel().getColumn(i).setHeaderValue(String.valueOf(Flight.getSeatLetters()[i]));
+        }
+        for (int i = 0; i < Flight.getMaxRows(); i++) {
+            Object[] rowData = new Object[Flight.getSeatLetters().length];
+            for (int j = 0; j < Flight.getSeatLetters().length; j++) {
+                rowData[j] = (i + 1) + "" + Flight.getSeatLetters()[j];
+            }
+            seatMapTableModel.addRow(rowData);
+        }
+        selectedSeatField.setText("");
+        bookSeatButton.setEnabled(false);
+    }
+
+    private void bookSeat() {
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
         if (currentlySelectedFlight == null) {
             JOptionPane.showMessageDialog(this, "Please select a flight first.", "Booking Error", JOptionPane.ERROR_MESSAGE);
             return;
         }
 
+<<<<<<< HEAD
         String name = userNameField.getText().trim();
         String email = userEmailField.getText().trim();
         String phone = userPhoneField.getText().trim();
@@ -1311,10 +1737,80 @@ public class PlaneBookingSystemGUI extends JFrame {
                     JOptionPane.showMessageDialog(this, "Payment successful! Your flight is booked.", "Success", JOptionPane.INFORMATION_MESSAGE);
                     newBooking.displayBookingDetails(guiOutputWriter);
                     updateSeatMap(); // Refresh seat map to show new booked seat
+=======
+        String userName = userNameField.getText();
+        String userEmail = userEmailField.getText();
+        String userPhone = userPhoneField.getText();
+
+        if (userName.isEmpty() || userEmail.isEmpty() || userPhone.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter your name, email, and phone number.", "Booking Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        String seatId = selectedSeatField.getText();
+        if (seatId.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please select a seat from the map.", "Booking Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (!currentlySelectedFlight.isSeatValid(seatId)) {
+            JOptionPane.showMessageDialog(this, "Invalid seat selected: " + seatId, "Booking Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        if (currentlySelectedFlight.getBookedSeats().contains(seatId)) {
+            JOptionPane.showMessageDialog(this, "Seat " + seatId + " is already booked. Please choose another.", "Booking Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        User passenger = new User(userName, userEmail, userPhone);
+
+        Booking booking = new Booking(passenger, currentlySelectedFlight, seatId);
+
+        PaymentDialog paymentDialog = new PaymentDialog(this, booking.getTotalPrice());
+        paymentDialog.setVisible(true);
+
+        if (paymentDialog.isPaymentConfirmed()) {
+            PaymentProcessor processor = null;
+            if (paymentDialog.getPaymentMethodChoice().equals("Cash")) {
+                processor = paymentService.createCashPayment(booking.getTotalPrice());
+            } else if (paymentDialog.getPaymentMethodChoice().equals("Card")) {
+                String cardNumber = paymentDialog.getCardNumber();
+                String expiryDate = paymentDialog.getExpiryDate();
+                String cvv = paymentDialog.getCvv();
+                processor = paymentService.createCardPayment(booking.getTotalPrice(), cardNumber, expiryDate, cvv);
+            }
+
+            if (processor != null) {
+                processor.processPayment(booking, inputReader, consoleOutputWriter);
+                if (booking.getPaymentStatus().equals("Paid")) {
+                    if (flightManager.bookSeat(currentlySelectedFlight, seatId, consoleOutputWriter)) {
+                        // Display booking details using JOptionPane for direct user feedback
+                        JOptionPane.showMessageDialog(this,
+                                "Booking successful!\n" +
+                                "Booking ID: " + booking.getBookingId() + "\n" +
+                                "Flight: " + currentlySelectedFlight.getFlightNumber() + "\n" +
+                                "Seat: " + seatId + "\n" +
+                                "Price: $" + String.format("%.2f", booking.getTotalPrice()),
+                                "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
+                        updateSeatMap();
+                        refreshFlightTable();
+                        userNameField.setText("");
+                        userEmailField.setText("");
+                        userPhoneField.setText("");
+                        selectedSeatField.setText("");
+                        bookSeatButton.setEnabled(false);
+                    } else {
+                        JOptionPane.showMessageDialog(this, "Failed to book seat " + seatId + ". It might have just been taken.", "Booking Failed", JOptionPane.ERROR_MESSAGE);
+                        booking.setPaymentStatus("Refund Required");
+                        consoleOutputWriter.println("Payment processed but seat booking failed. Refund might be required.");
+                    }
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
                 } else {
                     JOptionPane.showMessageDialog(this, "Payment failed. Please try again.", "Payment Error", JOptionPane.ERROR_MESSAGE);
                 }
             } else {
+<<<<<<< HEAD
                 JOptionPane.showMessageDialog(this, "Payment cancelled. Booking is not finalized.", "Booking Cancelled", JOptionPane.WARNING_MESSAGE);
             }
 
@@ -1378,3 +1874,38 @@ public class PlaneBookingSystemGUI extends JFrame {
         });
     }
 }
+=======
+                JOptionPane.showMessageDialog(this, "Invalid payment method selected.", "Payment Error", JOptionPane.ERROR_MESSAGE);
+            }
+        } else {
+            consoleOutputWriter.println("Payment cancelled by user for booking ID " + booking.getBookingId());
+            JOptionPane.showMessageDialog(this, "Booking cancelled.", "Booking Status", JOptionPane.INFORMATION_MESSAGE);
+        }
+    }
+
+    private void addDummyData() {
+        List<Flight> initialFlights = new ArrayList<>();
+        initialFlights.add(new Flight("KQ100", "Nairobi", "Dubai", 450.00));
+        initialFlights.add(new Flight("EK201", "Dubai", "London", 700.00));
+        initialFlights.add(new Flight("BA249", "London", "Nairobi", 600.00));
+        this.flightManager = new SimpleFlightManager(initialFlights);
+        flightManager.bookSeat(initialFlights.get(0), "1A", consoleOutputWriter);
+        flightManager.bookSeat(initialFlights.get(0), "1B", consoleOutputWriter);
+        flightManager.bookSeat(initialFlights.get(1), "5C", consoleOutputWriter);
+    }
+
+    public static void main(String[] args) {
+        SwingUtilities.invokeLater(() -> {
+            OutputWriter consoleWriter = new ConsoleOutputWriter();
+            GUITextFieldReader dummyReader = new GUITextFieldReader(new JTextField());
+
+            FlightManager flightMgr = null;
+            DefaultPaymentService paymentSvc = new DefaultPaymentService();
+
+            PlaneBookingSystemGUI app = new PlaneBookingSystemGUI(dummyReader, consoleWriter,
+                    flightMgr, paymentSvc);
+            app.setVisible(true);
+        });
+    }
+}
+>>>>>>> 182b1fb5212b852bd925f787cac33b1939f4e635
