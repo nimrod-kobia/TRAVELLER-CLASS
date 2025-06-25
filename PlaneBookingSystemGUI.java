@@ -1,24 +1,22 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
+import javax.swing.table.TableCellRenderer;
 import javax.swing.table.DefaultTableCellRenderer;
 import javax.swing.SwingConstants;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.sql.Date;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
+// import java.time.LocalDate; // Not needed after User simplification
 
-// Interfaces
-interface IdentifiableEntity {
-    String getID();
-}
+// --- 1. Interfaces for Abstraction (ISP & DIP) ---
 
-interface AirlineInfo {
-    String getAirlineDetails();
-}
-
+// Keeping core interfaces for good design principles
 interface PersonDetails {
     String getName();
     String getEmail();
@@ -39,22 +37,9 @@ interface OutputWriter {
     void printf(String format, Object... args);
 }
 
-interface AircraftManager {
-    void addAircraft(Aircraft aircraft);
-    List<Aircraft> getAllAircraft();
-    void displayAllAircraft(OutputWriter writer);
-}
-
-interface AirportManager {
-    void addAirport(Airport airport);
-    List<Airport> getAllAirports();
-    void displayAllAirports(OutputWriter writer);
-}
-
 interface FlightManager {
     List<Flight> getAvailableFlights();
-    void displayAvailableFlights(OutputWriter writer);
-    Flight selectFlight(InputReader reader, OutputWriter writer);
+    void displayAvailableFlights(OutputWriter writer); // Can be used for console logs
     boolean bookSeat(Flight flight, String seatId, OutputWriter writer);
 }
 
@@ -62,43 +47,9 @@ interface PaymentProcessor {
     void processPayment(Booking booking, InputReader reader, OutputWriter writer);
 }
 
-// --- New Classes for User details (Passport and Visa) ---
-class Passport {
-    private String passportNumber;
-
-    public Passport(String passportNumber) {
-        this.passportNumber = passportNumber;
-    }
-
-    public String getPassportNumber() {
-        return passportNumber;
-    }
-
-    @Override
-    public String toString() {
-        return passportNumber;
-    }
-}
-
-class Visa {
-    private String visaNumber;
-
-    public Visa(String visaNumber) {
-        this.visaNumber = visaNumber;
-    }
-
-    public String getVisaNumber() {
-        return visaNumber;
-    }
-
-    @Override
-    public String toString() {
-        return visaNumber;
-    }
-}
-
 // --- 2. Concrete Implementations (Low-level Modules) ---
 
+// Simplified Person and User classes
 abstract class Person implements PersonDetails {
     protected String name, email, phoneNumber;
 
@@ -119,133 +70,16 @@ abstract class Person implements PersonDetails {
 }
 
 class User extends Person {
-    private String dob; // Date of Birth as String (YYYY-MM-DD)
-    private String nationality;
-    private Passport passport;
-    private Visa visa;
-
-    // Constructor for GUI/basic interaction (without full document details)
+    // Removed dob, nationality, Passport, Visa for simplification
     public User(String name, String email, String phoneNumber) {
-        super(name, email, phoneNumber); // phoneNumber here is the contact number
-        this.dob = null; // These will be null unless explicitly set via another constructor or setter
-        this.nationality = null;
-        this.passport = null;
-        this.visa = null;
-    }
-
-    // Constructor for loading from database or detailed input
-    public User(String name, String dob, String nationality, Passport passport, Visa visa, String email) {
-        super(name, email, null); // phoneNumber is null, assume email is unique identifier for this constructor
-        this.dob = dob;
-        this.nationality = nationality;
-        this.passport = passport;
-        this.visa = visa;
-        // If phone number is also part of DB user, it needs to be passed here too.
-        // For simplicity, sticking to the email as primary contact in the super call.
-    }
-
-    public String getDOB() {
-        return dob;
-    }
-
-    public String getNationality() {
-        return nationality;
-    }
-
-    public String getVisaNumber() {
-        return (visa != null) ? visa.getVisaNumber() : null;
-    }
-
-    public String getPassportNumber() {
-        return (passport != null) ? passport.getPassportNumber() : null;
+        super(name, email, phoneNumber);
     }
 
     @Override
     public String getRoleDescription() { return "Passenger"; }
 }
 
-class Aircraft implements IdentifiableEntity {
-    private String registrationNumber, model, manufacturer;
-    private int seatingCapacity;
-    private double maxTakeoffWeight, range;
-    private int yearOfManufacture;
-
-    public Aircraft(String regNum, String model, String manf, int cap, double mtow, double rng, int year) {
-        this.registrationNumber = regNum;
-        this.model = model;
-        this.manufacturer = manf;
-        this.seatingCapacity = cap;
-        this.maxTakeoffWeight = mtow;
-        this.range = rng;
-        this.yearOfManufacture = year;
-    }
-
-    @Override
-    public String getID() { return registrationNumber; }
-    public double getRange() { return range; }
-    public String getModel() { return model; }
-    public String getManufacturer() { return manufacturer; }
-    public int getSeatingCapacity() { return seatingCapacity; }
-
-    @Override
-    public String toString() {
-        return String.format("Aircraft: %s %s (%s)\n   Capacity: %d, Range: %.1f km, Max Takeoff Weight: %.1f kg, Year: %d",
-                manufacturer, model, registrationNumber, seatingCapacity, range, maxTakeoffWeight, yearOfManufacture);
-    }
-}
-
-class Airlines implements AirlineInfo {
-    private String airlineName, airlineCode, headquarters, contactNumber, website;
-
-    public Airlines(String name, String code, String hq, String contact, String web) {
-        this.airlineName = name;
-        this.airlineCode = code;
-        this.headquarters = hq;
-        this.contactNumber = contact;
-        this.website = web;
-    }
-
-    @Override
-    public String getAirlineDetails() {
-        return "Airline Name: " + airlineName + "\nAirline Code: " + airlineCode + "\nHeadquarters: " + headquarters +
-                "\nContact: " + contactNumber + "\nWebsite: " + website;
-    }
-}
-
-class Airport implements IdentifiableEntity {
-    private String name, iataCode, icaoCode, city, country;
-    private int numberOfTerminals, numberOfRunways;
-    private double latitude, longitude;
-
-    public Airport(String name, String iata, String icao, String city, String country, int term, int runs, double lat, double lon) {
-        this.name = name;
-        this.iataCode = iata;
-        this.icaoCode = icao;
-        this.city = city;
-        this.country = country;
-        this.numberOfTerminals = term;
-        this.numberOfRunways = runs;
-        this.latitude = lat;
-        this.longitude = lon;
-    }
-
-    @Override
-    public String getID() { return iataCode; }
-    public String getName() { return name; }
-    public String getIataCode() { return iataCode; }
-    public String getCity() { return city; }
-    public String getCountry() { return country; }
-    public int getNumberOfTerminals() { return numberOfTerminals; }
-    public int getNumberOfRunways() { return numberOfRunways; }
-    public double getLatitude() { return latitude; }
-    public double getLongitude() { return longitude; }
-
-    @Override
-    public String toString() {
-        return String.format("Airport: %s (%s/%s)\n   Location: %s, %s\n   Terminals: %d, Runways: %d\n   Coordinates: Lat %.4f, Lon %.4f",
-                name, iataCode, icaoCode, city, country, numberOfTerminals, numberOfRunways, latitude, longitude);
-    }
-}
+// Removed Aircraft, Airlines, Airport classes as Admin Portal is removed.
 
 class Booking {
     private static int idCounter = 1;
@@ -271,7 +105,7 @@ class Booking {
         writer.println("Booking ID: " + bookingId);
         writer.println("Passenger: " + passenger.getName() + " (" + passenger.getRoleDescription() + ")");
         writer.println("Email: " + passenger.getEmail());
-        writer.println("Phone: " + passenger.getPhoneNumber()); // This is the contact phone from Person
+        writer.println("Phone: " + passenger.getPhoneNumber());
         writer.println("Flight Number: " + flightNumber);
         writer.println("Seat ID: " + seatId);
         writer.println("Booking Time: " + bookingTime.format(formatter));
@@ -287,7 +121,7 @@ class Booking {
     public String getPaymentStatus() { return paymentStatus; }
 }
 
-class Flight implements IdentifiableEntity {
+class Flight { // Removed IdentifiableEntity as it's no longer an interface after simplification
     private String flightNumber, departureLocation, arrivalLocation;
     private double price;
     private Set<String> bookedSeats = new HashSet<>();
@@ -301,22 +135,8 @@ class Flight implements IdentifiableEntity {
         this.price = price;
     }
 
-    @Override
-    public String getID() { return flightNumber; }
-
     public void displayInfo(OutputWriter writer) {
         writer.printf("Flight: %s from %s to %s - Price: $%.2f%n", flightNumber, departureLocation, arrivalLocation, price);
-    }
-
-    public void displayAvailableSeats(OutputWriter writer) {
-        writer.println("Available Seats for Flight " + flightNumber + ":");
-        for (int r = 1; r <= MAX_ROWS; r++) {
-            StringBuilder rowSeats = new StringBuilder();
-            for (char l : SEAT_LETTERS) {
-                rowSeats.append((bookedSeats.contains(r + "" + l) ? "XX " : (r + "" + l + " ")));
-            }
-            writer.println(rowSeats.toString());
-        }
     }
 
     public boolean isSeatValid(String seatId) {
@@ -330,14 +150,17 @@ class Flight implements IdentifiableEntity {
         } catch (NumberFormatException e) { return false; }
     }
 
-    public boolean bookSeat(String seatId) {
+    public boolean bookSeat(String seatId, OutputWriter writer) {
         if (!isSeatValid(seatId)) {
+            writer.println("Error: Invalid seat format or out of bounds.");
             return false;
         }
         if (bookedSeats.contains(seatId)) {
+            writer.println("Error: Seat " + seatId + " is already booked.");
             return false;
         }
         bookedSeats.add(seatId);
+        writer.println("Seat " + seatId + " booked successfully for flight " + flightNumber + ".");
         return true;
     }
 
@@ -472,83 +295,24 @@ class GUITextFieldReader implements InputReader {
     }
 }
 
-class GUITextAreaWriter implements OutputWriter {
-    private JTextArea textArea;
-
-    public GUITextAreaWriter(JTextArea textArea) {
-        this.textArea = textArea;
-    }
-
+class ConsoleOutputWriter implements OutputWriter {
     @Override
     public void print(String message) {
-        SwingUtilities.invokeLater(() -> textArea.append(message));
+        System.out.print(message);
     }
 
     @Override
     public void println(String message) {
-        SwingUtilities.invokeLater(() -> textArea.append(message + "\n"));
+        System.out.println(message);
     }
 
     @Override
     public void printf(String format, Object... args) {
-        SwingUtilities.invokeLater(() -> textArea.append(String.format(format, args)));
+        System.out.printf(format, args);
     }
 }
 
 // --- 3. Service Layer (High-level Modules) ---
-
-class SimpleAircraftManager implements AircraftManager {
-    private List<Aircraft> aircraftFleet = new ArrayList<>();
-
-    @Override
-    public void addAircraft(Aircraft aircraft) {
-        aircraftFleet.add(aircraft);
-    }
-
-    @Override
-    public List<Aircraft> getAllAircraft() {
-        return Collections.unmodifiableList(aircraftFleet);
-    }
-
-    @Override
-    public void displayAllAircraft(OutputWriter writer) {
-        writer.println("\nRegistered Aircraft Fleet");
-        if (aircraftFleet.isEmpty()) {
-            writer.println("No aircraft added yet.");
-            return;
-        }
-        for (int i = 0; i < aircraftFleet.size(); i++) {
-            writer.println("\nAircraft #" + (i + 1) + "\n" + aircraftFleet.get(i));
-        }
-        writer.println("-------------------------------");
-    }
-}
-
-class SimpleAirportManager implements AirportManager {
-    private List<Airport> airportNetwork = new ArrayList<>();
-
-    @Override
-    public void addAirport(Airport airport) {
-        airportNetwork.add(airport);
-    }
-
-    @Override
-    public List<Airport> getAllAirports() {
-        return Collections.unmodifiableList(airportNetwork);
-    }
-
-    @Override
-    public void displayAllAirports(OutputWriter writer) {
-        writer.println("\nRegistered Airports");
-        if (airportNetwork.isEmpty()) {
-            writer.println("No airports added yet.");
-            return;
-        }
-        for (int i = 0; i < airportNetwork.size(); i++) {
-            writer.println("\nAirport #" + (i + 1) + "\n" + airportNetwork.get(i));
-        }
-    }
-}
 
 class SimpleFlightManager implements FlightManager {
     private List<Flight> availableFlights;
@@ -577,14 +341,12 @@ class SimpleFlightManager implements FlightManager {
 
     @Override
     public Flight selectFlight(InputReader reader, OutputWriter writer) {
-        // This method is designed for console, but in GUI, the flight is selected directly from table.
-        writer.println("This selectFlight method is not used directly in GUI interaction for selecting a flight.");
-        return null;
+        return null; // Not used in GUI direct selection flow
     }
 
     @Override
     public boolean bookSeat(Flight flight, String seatId, OutputWriter writer) {
-        return flight.bookSeat(seatId);
+        return flight.bookSeat(seatId, writer);
     }
 }
 
@@ -592,8 +354,7 @@ class DefaultPaymentService {
     private static int nextPaymentId = 1;
 
     public void initiatePayment(Booking booking, InputReader reader, OutputWriter writer) {
-        writer.println("\nPayment Initiation");
-        // In GUI, this method is called after the PaymentDialog handles user input.
+        writer.println("\n--- Payment Initiation ---");
     }
 
     public PaymentProcessor createCashPayment(double amount) {
@@ -770,20 +531,6 @@ public class PlaneBookingSystemGUI extends JFrame {
     // --- Components for Main Menu / Role Selection ---
     private JPanel roleSelectionPanel;
 
-    // --- Components for Admin Portal ---
-    private JPanel adminPanel;
-    private JTextField adminAirportNameField, adminAirportIataField, adminAirportIcaoField, adminAirportCityField, adminAirportCountryField;
-    private JSpinner adminAirportTerminalsSpinner, adminAirportRunwaysSpinner;
-    private JTextField adminAirportLatField, adminAirportLonField;
-    private JTable airportTable;
-    private DefaultTableModel airportTableModel;
-
-    private JTextField adminAircraftRegField, adminAircraftModelField, adminAircraftManfField;
-    private JSpinner adminAircraftCapacitySpinner, adminAircraftYearSpinner;
-    private JTextField adminAircraftMTOWField, adminAircraftRangeField;
-    private JTable aircraftTable;
-    private DefaultTableModel aircraftTableModel;
-
     // --- Components for User Portal ---
     private JPanel userPanel;
     private JTextField userNameField, userEmailField, userPhoneField;
@@ -795,25 +542,18 @@ public class PlaneBookingSystemGUI extends JFrame {
     private SeatTableCellRenderer seatMapRenderer;
     private JTextField selectedSeatField;
 
-    private JTextArea outputDisplayArea;
-    private GUITextAreaWriter guiOutputWriter;
-
     // --- Dependencies ---
     private InputReader inputReader;
-    private AircraftManager aircraftManager;
-    private AirportManager airportManager;
     private FlightManager flightManager;
     private DefaultPaymentService paymentService;
+    private OutputWriter consoleOutputWriter; // For logging to console
 
     private Flight currentlySelectedFlight = null;
 
     public PlaneBookingSystemGUI(InputReader inputReader, OutputWriter outputWriter,
-        AircraftManager aircraftManager, AirportManager airportManager,FlightManager flightManager, DefaultPaymentService paymentService) 
-        {
+                                 FlightManager flightManager, DefaultPaymentService paymentService) {
         this.inputReader = inputReader;
-        this.guiOutputWriter = (GUITextAreaWriter) outputWriter;
-        this.aircraftManager = aircraftManager;
-        this.airportManager = airportManager;
+        this.consoleOutputWriter = outputWriter; // Assign to the console writer
         this.flightManager = flightManager;
         this.paymentService = paymentService;
 
@@ -823,27 +563,20 @@ public class PlaneBookingSystemGUI extends JFrame {
         setLocationRelativeTo(null);
 
         setupUI();
-        addDummyData();
-        refreshAdminTables();
+        addDummyData(); // Add dummy flights only
         refreshFlightTable();
     }
 
     private void setupUI() {
         setupRoleSelectionPanel();
-        setupAdminPanel();
-        setupUserPanel();
+        setupUserPanel(); // Only user panel now
 
         mainPanel.add(roleSelectionPanel, "ROLE_SELECTION");
-        mainPanel.add(adminPanel, "ADMIN_PORTAL");
         mainPanel.add(userPanel, "USER_PORTAL");
 
-        outputDisplayArea = new JTextArea(10, 80);
-        outputDisplayArea.setEditable(false);
-        JScrollPane scrollPane = new JScrollPane(outputDisplayArea);
-        scrollPane.setBorder(BorderFactory.createTitledBorder("System Output"));
-
+        // The "System Output" JTextArea and JScrollPane are completely removed.
+        // The mainPanel now takes up the entire center space of the JFrame.
         add(mainPanel, BorderLayout.CENTER);
-        add(scrollPane, BorderLayout.SOUTH);
 
         cardLayout.show(mainPanel, "ROLE_SELECTION");
     }
@@ -861,247 +594,14 @@ public class PlaneBookingSystemGUI extends JFrame {
         gbc.gridwidth = 2;
         roleSelectionPanel.add(titleLabel, gbc);
 
-        JButton adminButton = new JButton("Admin Portal");
-        adminButton.setFont(new Font("Arial", Font.PLAIN, 18));
-        adminButton.setPreferredSize(new Dimension(200, 50));
-        gbc.gridy = 1;
-        gbc.gridwidth = 1;
-        roleSelectionPanel.add(adminButton, gbc);
-
-        JButton userButton = new JButton("User Portal");
+        JButton userButton = new JButton("Start Booking (User Portal)");
         userButton.setFont(new Font("Arial", Font.PLAIN, 18));
-        userButton.setPreferredSize(new Dimension(200, 50));
-        gbc.gridx = 1;
+        userButton.setPreferredSize(new Dimension(250, 60)); // Make it larger and central
+        gbc.gridx = 0; // Center it
+        gbc.gridy = 1; // Align under title
         roleSelectionPanel.add(userButton, gbc);
 
-        adminButton.addActionListener(e -> cardLayout.show(mainPanel, "ADMIN_PORTAL"));
         userButton.addActionListener(e -> cardLayout.show(mainPanel, "USER_PORTAL"));
-    }
-
-    private void setupAdminPanel() {
-        adminPanel = new JPanel(new BorderLayout(10, 10));
-
-        JTabbedPane adminTabbedPane = new JTabbedPane();
-        adminTabbedPane.addTab("Manage Airports", createAirportManagementPanel());
-        adminTabbedPane.addTab("Manage Aircraft", createAircraftManagementPanel());
-
-        adminPanel.add(adminTabbedPane, BorderLayout.CENTER);
-
-        JButton backButton = new JButton("Back to Role Selection");
-        backButton.addActionListener(e -> cardLayout.show(mainPanel, "ROLE_SELECTION"));
-        JPanel backButtonPanel = new JPanel(new FlowLayout(FlowLayout.LEFT));
-        backButtonPanel.add(backButton);
-        adminPanel.add(backButtonPanel, BorderLayout.NORTH);
-    }
-
-    private JPanel createAirportManagementPanel() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-
-        JPanel inputPanel = new JPanel(new GridBagLayout());
-        inputPanel.setBorder(BorderFactory.createTitledBorder("Add New Airport"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        int row = 0;
-        gbc.gridx = 0; gbc.gridy = row; inputPanel.add(new JLabel("Name:"), gbc);
-        gbc.gridx = 1; adminAirportNameField = new JTextField(20); inputPanel.add(adminAirportNameField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("IATA Code:"), gbc);
-        gbc.gridx = 1; adminAirportIataField = new JTextField(5); inputPanel.add(adminAirportIataField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("ICAO Code:"), gbc);
-        gbc.gridx = 1; adminAirportIcaoField = new JTextField(5); inputPanel.add(adminAirportIcaoField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("City:"), gbc);
-        gbc.gridx = 1; adminAirportCityField = new JTextField(15); inputPanel.add(adminAirportCityField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Country:"), gbc);
-        gbc.gridx = 1; adminAirportCountryField = new JTextField(15); inputPanel.add(adminAirportCountryField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Terminals:"), gbc);
-        gbc.gridx = 1; adminAirportTerminalsSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 20, 1)); inputPanel.add(adminAirportTerminalsSpinner, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Runways:"), gbc);
-        gbc.gridx = 1; adminAirportRunwaysSpinner = new JSpinner(new SpinnerNumberModel(1, 1, 10, 1)); inputPanel.add(adminAirportRunwaysSpinner, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Latitude:"), gbc);
-        gbc.gridx = 1; adminAirportLatField = new JTextField(10); inputPanel.add(adminAirportLatField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Longitude:"), gbc);
-        gbc.gridx = 1; adminAirportLonField = new JTextField(10); inputPanel.add(adminAirportLonField, gbc);
-
-        JButton addAirportButton = new JButton("Add Airport");
-        gbc.gridx = 0; gbc.gridy = ++row; gbc.gridwidth = 2;
-        inputPanel.add(addAirportButton, gbc);
-
-        addAirportButton.addActionListener(e -> addAirport());
-
-        airportTableModel = new DefaultTableModel(new Object[]{"Name", "IATA", "City", "Country", "Terminals", "Runways"}, 0);
-        airportTable = new JTable(airportTableModel);
-        airportTable.setFillsViewportHeight(true);
-        JScrollPane airportTableScrollPane = new JScrollPane(airportTable);
-        airportTableScrollPane.setBorder(BorderFactory.createTitledBorder("Registered Airports"));
-
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inputPanel, airportTableScrollPane);
-        splitPane.setResizeWeight(0.3);
-
-        panel.add(splitPane, BorderLayout.CENTER);
-        return panel;
-    }
-
-    private JPanel createAircraftManagementPanel() {
-        JPanel panel = new JPanel(new BorderLayout(10, 10));
-
-        JPanel inputPanel = new JPanel(new GridBagLayout());
-        inputPanel.setBorder(BorderFactory.createTitledBorder("Add New Aircraft"));
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
-
-        int row = 0;
-        gbc.gridx = 0; gbc.gridy = row; inputPanel.add(new JLabel("Registration No.:"), gbc);
-        gbc.gridx = 1; adminAircraftRegField = new JTextField(15); inputPanel.add(adminAircraftRegField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Model:"), gbc);
-        gbc.gridx = 1; adminAircraftModelField = new JTextField(15); inputPanel.add(adminAircraftModelField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Manufacturer:"), gbc);
-        gbc.gridx = 1; adminAircraftManfField = new JTextField(15); inputPanel.add(adminAircraftManfField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Capacity:"), gbc);
-        gbc.gridx = 1; adminAircraftCapacitySpinner = new JSpinner(new SpinnerNumberModel(100, 1, 800, 1)); inputPanel.add(adminAircraftCapacitySpinner, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Max Takeoff Weight (kg):"), gbc);
-        gbc.gridx = 1; adminAircraftMTOWField = new JTextField(10); inputPanel.add(adminAircraftMTOWField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Range (km):"), gbc);
-        gbc.gridx = 1; adminAircraftRangeField = new JTextField(10); inputPanel.add(adminAircraftRangeField, gbc);
-
-        gbc.gridx = 0; gbc.gridy = ++row; inputPanel.add(new JLabel("Year of Manufacture:"), gbc);
-        gbc.gridx = 1; adminAircraftYearSpinner = new JSpinner(new SpinnerNumberModel(2020, 1900, LocalDateTime.now().getYear(), 1)); inputPanel.add(adminAircraftYearSpinner, gbc);
-
-        JButton addAircraftButton = new JButton("Add Aircraft");
-        gbc.gridx = 0; gbc.gridy = ++row; gbc.gridwidth = 2;
-        inputPanel.add(addAircraftButton, gbc);
-
-        addAircraftButton.addActionListener(e -> addAircraft());
-
-        aircraftTableModel = new DefaultTableModel(new Object[]{"Registration No.", "Model", "Manufacturer", "Capacity", "Range"}, 0);
-        aircraftTable = new JTable(aircraftTableModel);
-        aircraftTable.setFillsViewportHeight(true);
-        JScrollPane aircraftTableScrollPane = new JScrollPane(aircraftTable);
-        aircraftTableScrollPane.setBorder(BorderFactory.createTitledBorder("Registered Aircraft"));
-
-        JSplitPane splitPane = new JSplitPane(JSplitPane.HORIZONTAL_SPLIT, inputPanel, aircraftTableScrollPane);
-        splitPane.setResizeWeight(0.3);
-
-        panel.add(splitPane, BorderLayout.CENTER);
-        return panel;
-    }
-
-    private void addAirport() {
-        try {
-            String name = adminAirportNameField.getText();
-            String iata = adminAirportIataField.getText().toUpperCase();
-            String icao = adminAirportIcaoField.getText().toUpperCase();
-            String city = adminAirportCityField.getText();
-            String country = adminAirportCountryField.getText();
-            int terminals = (Integer) adminAirportTerminalsSpinner.getValue();
-            int runways = (Integer) adminAirportRunwaysSpinner.getValue();
-            double lat = Double.parseDouble(adminAirportLatField.getText());
-            double lon = Double.parseDouble(adminAirportLonField.getText());
-
-            if (name.isEmpty() || iata.isEmpty() || icao.isEmpty() || city.isEmpty() || country.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill in all airport fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            Airport newAirport = new Airport(name, iata, icao, city, country, terminals, runways, lat, lon);
-            airportManager.addAirport(newAirport);
-            refreshAdminTables();
-            guiOutputWriter.println("Airport added: " + newAirport.getName());
-            clearAirportFields();
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid number format for latitude, longitude, terminals, or runways.", "Input Error", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error adding airport: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void clearAirportFields() {
-        adminAirportNameField.setText("");
-        adminAirportIataField.setText("");
-        adminAirportIcaoField.setText("");
-        adminAirportCityField.setText("");
-        adminAirportCountryField.setText("");
-        adminAirportTerminalsSpinner.setValue(1);
-        adminAirportRunwaysSpinner.setValue(1);
-        adminAirportLatField.setText("");
-        adminAirportLonField.setText("");
-    }
-
-    private void addAircraft() {
-        try {
-            String regNum = adminAircraftRegField.getText().toUpperCase();
-            String model = adminAircraftModelField.getText();
-            String manf = adminAircraftManfField.getText();
-            int capacity = (Integer) adminAircraftCapacitySpinner.getValue();
-            double mtow = Double.parseDouble(adminAircraftMTOWField.getText());
-            double range = Double.parseDouble(adminAircraftRangeField.getText());
-            int year = (Integer) adminAircraftYearSpinner.getValue();
-
-            if (regNum.isEmpty() || model.isEmpty() || manf.isEmpty()) {
-                JOptionPane.showMessageDialog(this, "Please fill in all aircraft fields.", "Input Error", JOptionPane.ERROR_MESSAGE);
-                return;
-            }
-
-            Aircraft newAircraft = new Aircraft(regNum, model, manf, capacity, mtow, range, year);
-            aircraftManager.addAircraft(newAircraft);
-            refreshAdminTables();
-            guiOutputWriter.println("Aircraft added: " + newAircraft.getModel() + " (" + newAircraft.getID() + ")");
-            clearAircraftFields();
-        } catch (NumberFormatException ex) {
-            JOptionPane.showMessageDialog(this, "Invalid number format for capacity, MTOW, or range.", "Input Error", JOptionPane.ERROR_MESSAGE);
-        } catch (Exception ex) {
-            JOptionPane.showMessageDialog(this, "Error adding aircraft: " + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-        }
-    }
-
-    private void clearAircraftFields() {
-        adminAircraftRegField.setText("");
-        adminAircraftModelField.setText("");
-        adminAircraftManfField.setText("");
-        adminAircraftCapacitySpinner.setValue(100);
-        adminAircraftMTOWField.setText("");
-        adminAircraftRangeField.setText("");
-        adminAircraftYearSpinner.setValue(LocalDateTime.now().getYear());
-    }
-
-    private void refreshAdminTables() {
-        airportTableModel.setRowCount(0);
-        aircraftTableModel.setRowCount(0);
-
-        for (Airport airport : airportManager.getAllAirports()) {
-            airportTableModel.addRow(new Object[]{
-                    airport.getName(),
-                    airport.getIataCode(),
-                    airport.getCity(),
-                    airport.getCountry(),
-                    airport.getNumberOfTerminals(),
-                    airport.getNumberOfRunways()
-            });
-        }
-
-        for (Aircraft aircraft : aircraftManager.getAllAircraft()) {
-            aircraftTableModel.addRow(new Object[]{
-                    aircraft.getID(),
-                    aircraft.getModel(),
-                    aircraft.getManufacturer(),
-                    aircraft.getSeatingCapacity(),
-                    String.format("%.1f km", aircraft.getRange())
-            });
-        }
     }
 
     private void setupUserPanel() {
@@ -1131,7 +631,6 @@ public class PlaneBookingSystemGUI extends JFrame {
                 int selectedRow = flightTable.getSelectedRow();
                 if (selectedRow != -1) {
                     currentlySelectedFlight = flightManager.getAvailableFlights().get(selectedRow);
-                    guiOutputWriter.println("Selected Flight: " + currentlySelectedFlight.getFlightNumber());
                     selectFlightButton.setEnabled(true);
                     updateSeatMap();
                 } else {
@@ -1149,7 +648,7 @@ public class PlaneBookingSystemGUI extends JFrame {
         selectFlightButton.setEnabled(false);
         selectFlightButton.addActionListener(e -> {
             if (currentlySelectedFlight != null) {
-                guiOutputWriter.println("You have confirmed selection of Flight: " + currentlySelectedFlight.getFlightNumber());
+                JOptionPane.showMessageDialog(this, "You have selected Flight: " + currentlySelectedFlight.getFlightNumber(), "Flight Selected", JOptionPane.INFORMATION_MESSAGE);
             }
         });
         flightButtonsPanel.add(selectFlightButton);
@@ -1304,7 +803,6 @@ public class PlaneBookingSystemGUI extends JFrame {
             return;
         }
 
-        // Create a basic User object for the booking flow
         User passenger = new User(userName, userEmail, userPhone);
 
         Booking booking = new Booking(passenger, currentlySelectedFlight, seatId);
@@ -1324,11 +822,17 @@ public class PlaneBookingSystemGUI extends JFrame {
             }
 
             if (processor != null) {
-                processor.processPayment(booking, inputReader, guiOutputWriter);
+                processor.processPayment(booking, inputReader, consoleOutputWriter);
                 if (booking.getPaymentStatus().equals("Paid")) {
-                    if (flightManager.bookSeat(currentlySelectedFlight, seatId, guiOutputWriter)) {
-                        booking.displayBookingDetails(guiOutputWriter);
-                        JOptionPane.showMessageDialog(this, "Booking successful for Flight " + currentlySelectedFlight.getFlightNumber() + ", Seat " + seatId + "!", "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
+                    if (flightManager.bookSeat(currentlySelectedFlight, seatId, consoleOutputWriter)) {
+                        // Display booking details using JOptionPane for direct user feedback
+                        JOptionPane.showMessageDialog(this,
+                                "Booking successful!\n" +
+                                "Booking ID: " + booking.getBookingId() + "\n" +
+                                "Flight: " + currentlySelectedFlight.getFlightNumber() + "\n" +
+                                "Seat: " + seatId + "\n" +
+                                "Price: $" + String.format("%.2f", booking.getTotalPrice()),
+                                "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
                         updateSeatMap();
                         refreshFlightTable();
                         userNameField.setText("");
@@ -1339,7 +843,7 @@ public class PlaneBookingSystemGUI extends JFrame {
                     } else {
                         JOptionPane.showMessageDialog(this, "Failed to book seat " + seatId + ". It might have just been taken.", "Booking Failed", JOptionPane.ERROR_MESSAGE);
                         booking.setPaymentStatus("Refund Required");
-                        guiOutputWriter.println("Payment processed but seat booking failed. Refund might be required.");
+                        consoleOutputWriter.println("Payment processed but seat booking failed. Refund might be required.");
                     }
                 } else {
                     JOptionPane.showMessageDialog(this, "Payment failed. Please try again.", "Payment Error", JOptionPane.ERROR_MESSAGE);
@@ -1348,47 +852,32 @@ public class PlaneBookingSystemGUI extends JFrame {
                 JOptionPane.showMessageDialog(this, "Invalid payment method selected.", "Payment Error", JOptionPane.ERROR_MESSAGE);
             }
         } else {
-            guiOutputWriter.println("Payment cancelled by user for booking ID " + booking.getBookingId());
+            consoleOutputWriter.println("Payment cancelled by user for booking ID " + booking.getBookingId());
             JOptionPane.showMessageDialog(this, "Booking cancelled.", "Booking Status", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
     private void addDummyData() {
-        airportManager.addAirport(new Airport("Jomo Kenyatta International Airport", "NBO", "HKJK", "Nairobi", "Kenya", 2, 2, -1.3192, 36.9278));
-        airportManager.addAirport(new Airport("Dubai International Airport", "DXB", "OMDB", "Dubai", "UAE", 3, 2, 25.2532, 55.3657));
-        airportManager.addAirport(new Airport("Heathrow Airport", "LHR", "EGLL", "London", "UK", 5, 2, 51.4700, -0.4543));
-        airportManager.addAirport(new Airport("John F. Kennedy International Airport", "JFK", "KJFK", "New York", "USA", 6, 4, 40.6413, -73.7781));
-
-        aircraftManager.addAircraft(new Aircraft("5Y-KDN", "Boeing 787 Dreamliner", "Boeing", 280, 254000, 15000, 2018));
-        aircraftManager.addAircraft(new Aircraft("A6-EFA", "Airbus A380", "Airbus", 550, 575000, 15200, 2010));
-        aircraftManager.addAircraft(new Aircraft("G-GBCL", "Boeing 737-800", "Boeing", 189, 79000, 5700, 2015));
-        aircraftManager.addAircraft(new Aircraft("N123AA", "Airbus A320", "Airbus", 150, 78000, 6100, 2019));
-
         List<Flight> initialFlights = new ArrayList<>();
         initialFlights.add(new Flight("KQ100", "Nairobi", "Dubai", 450.00));
         initialFlights.add(new Flight("EK201", "Dubai", "London", 700.00));
         initialFlights.add(new Flight("BA249", "London", "Nairobi", 600.00));
-        initialFlights.add(new Flight("DL400", "New York", "London", 850.00));
         this.flightManager = new SimpleFlightManager(initialFlights);
-        flightManager.bookSeat(initialFlights.get(0), "1A", guiOutputWriter);
-        flightManager.bookSeat(initialFlights.get(0), "1B", guiOutputWriter);
-        flightManager.bookSeat(initialFlights.get(1), "5C", guiOutputWriter);
+        flightManager.bookSeat(initialFlights.get(0), "1A", consoleOutputWriter);
+        flightManager.bookSeat(initialFlights.get(0), "1B", consoleOutputWriter);
+        flightManager.bookSeat(initialFlights.get(1), "5C", consoleOutputWriter);
     }
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            JTextArea sharedOutputArea = new JTextArea();
-            GUITextAreaWriter guiWriter = new GUITextAreaWriter(sharedOutputArea);
+            OutputWriter consoleWriter = new ConsoleOutputWriter();
             GUITextFieldReader dummyReader = new GUITextFieldReader(new JTextField());
 
-            AircraftManager aircraftMgr = new SimpleAircraftManager();
-            AirportManager airportMgr = new SimpleAirportManager();
             FlightManager flightMgr = null;
-
             DefaultPaymentService paymentSvc = new DefaultPaymentService();
 
-            PlaneBookingSystemGUI app = new PlaneBookingSystemGUI(dummyReader, guiWriter,
-                    aircraftMgr, airportMgr, flightMgr, paymentSvc);
+            PlaneBookingSystemGUI app = new PlaneBookingSystemGUI(dummyReader, consoleWriter,
+                    flightMgr, paymentSvc);
             app.setVisible(true);
         });
     }
