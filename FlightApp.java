@@ -25,12 +25,12 @@ class Flight implements FlightInfo {
     }
 
     public void displayInfo(Object object) {
-        // TODO Auto-generated method stub
+        
         throw new UnsupportedOperationException("Unimplemented method 'displayInfo'");
     }
 
     public String getFlightNumber() {
-        // TODO Auto-generated method stub
+       
         throw new UnsupportedOperationException("Unimplemented method 'getFlightNumber'");
     }
 }

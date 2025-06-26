@@ -36,11 +36,7 @@ class Visa implements Identifiable {
 }
 
 // S - Single Responsibility Principle (SRP)
-// This interface defines the core properties of a Person.
-// I - Interface Segregation Principle (ISP)
-// We could have separate interfaces for different aspects if the 'Person'
-// became too complex, e.g., 'Nameable', 'DOBReadable', etc. For this small example,
-// one interface for basic person details is acceptable.
+
 interface PersonDetails {
     String getName();
     String getDOB();
@@ -48,22 +44,16 @@ interface PersonDetails {
 }
 
 // O - Open/Closed Principle (OCP) & L - Liskov Substitution Principle (LSP)
-// Person is now an interface, which makes it open for extension (new implementations)
-// but closed for modification. Any class implementing Person will be substitutable
-// where a PersonDetails is expected.
+
 interface Person extends PersonDetails {
     // We can add methods specific to a Person here if needed,
-    // keeping PersonDetails focused on just the basic properties.
-    // For now, it just extends PersonDetails.
+
 }
 
 
 // S - Single Responsibility Principle (SRP)
-// Class responsible for user-specific attributes and behavior.
+
 // D - Dependency Inversion Principle (DIP)
-// User depends on the 'Identifiable' abstraction for Passport and Visa,
-// not on the concrete 'Passport' or 'Visa' classes directly for their IDs.
-// Similarly, it depends on the 'Person' interface for core person details.
 class User implements Person { // User "is a" Person
     private String name;
     private String dob;

@@ -73,7 +73,7 @@ public class Booking {
         System.out.println("Flight ID: " + flightId);
         System.out.println("Seat ID: " + seatId);
         System.out.println("Booking Time: " + bookingTime);
-        System.out.println("Total Price: $" + totalPrice);
+        System.out.println("Total Price: ksh" + totalPrice);
         System.out.println("Booking Status: " + bookingStatus);
         System.out.println("Payment Status: " + paymentStatus);
     }
