@@ -376,8 +376,10 @@ private boolean isVisaInUse(String visaNumber) throws SQLException {
     }
 
 // Main.java
-public class Main {
+ 
     public static void main(String[] args) {
+        
+    
         DatabaseManager dbManager = new DatabaseManager();
         
         try {
@@ -389,7 +391,7 @@ public class Main {
             
             // 2. Add user
             int userId = dbManager.addUser("John ", Date.valueOf("1985-05-20"), 
-                                         "American", null, null, "john@example.com");
+                                         "American", null, null, "john31@example.com");
             
             System.out.println("Created user with ID: " + userId);
             
@@ -400,6 +402,9 @@ public class Main {
         }
     }
 }
-  
 
-}
+ 
+
+
+
+
