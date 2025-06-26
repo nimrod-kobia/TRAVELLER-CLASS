@@ -9,7 +9,6 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.List;
 import java.util.regex.Pattern;
-// import java.time.LocalDate; // Not needed after User simplification
 
 // --- 1. Interfaces for Abstraction (ISP & DIP) ---
 
@@ -199,7 +198,7 @@ abstract class AbstractPayment implements PaymentProcessor {
 
     @Override
     public String toString() {
-        return String.format("Payment ID: %d, Amount: $%.2f, Method: %s, Date: %s", paymentId, amount, paymentMethod, paymentDate.toString());
+        return String.format("Payment ID: %d, Amount: ksh, Method: %s, Date: %s", paymentId, amount, paymentMethod, paymentDate.toString());
     }
 }
 
@@ -212,7 +211,7 @@ class CashPayment extends AbstractPayment {
     public void processPayment(Booking booking, InputReader reader, OutputWriter writer) {
         writer.println("\nProcessing cash payment...");
         if (validatePaymentDetails()) {
-            writer.printf("Payment of $%.2f using %s accepted for booking ID %d. Payment successful on: %s%n",
+            writer.printf("Payment of Ksh%.2f using %s accepted for booking ID %d. Payment successful on: %s%n",
                     amount, paymentMethod, booking.getBookingId(), paymentDate.toString());
             booking.setPaymentStatus("Paid");
         } else {
@@ -244,7 +243,7 @@ class CardPayment extends AbstractPayment {
     public void processPayment(Booking booking, InputReader reader, OutputWriter writer) {
         writer.println("\nProcessing card payment...");
         if (validatePaymentDetails()) {
-            writer.printf("Payment of $%.2f using Card (ending with %s) accepted for booking ID %d. Payment successful on: %s%n",
+            writer.printf("Payment of Ksh%.2f using Card (ending with %s) accepted for booking ID %d. Payment successful on: %s%n",
                     amount, cardNumber.substring(cardNumber.length() - 4), booking.getBookingId(), paymentDate.toString());
             booking.setPaymentStatus("Paid");
         } else {
@@ -347,7 +346,7 @@ class DefaultPaymentService {
     private static int nextPaymentId = 1;
 
     public void initiatePayment(Booking booking, InputReader reader, OutputWriter writer) {
-        writer.println("\n--- Payment Initiation ---");
+        writer.println("\n Payment Initiation");
     }
 
     public PaymentProcessor createCashPayment(double amount) {
@@ -410,7 +409,7 @@ class PaymentDialog extends JDialog {
     private boolean paymentConfirmed = false;
 
     public PaymentDialog(JFrame parent, double amount) {
-        super(parent, "Process Payment for $" + String.format("%.2f", amount), true);
+        super(parent, "Process Payment for Ksh" + String.format("%.2f", amount), true);
         setLayout(new BorderLayout(10, 10));
         setSize(400, 300);
         setLocationRelativeTo(parent);
@@ -420,7 +419,7 @@ class PaymentDialog extends JDialog {
         gbc.insets = new Insets(5, 5, 5, 5);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        JLabel amountLabel = new JLabel("Amount to Pay: $" + String.format("%.2f", amount));
+        JLabel amountLabel = new JLabel("Amount to Pay: Ksh" + String.format("%.2f", amount));
         amountLabel.setFont(amountLabel.getFont().deriveFont(Font.BOLD, 14f));
         gbc.gridx = 0; gbc.gridy = 0; gbc.gridwidth = 2;
         mainPanel.add(amountLabel, gbc);
@@ -521,10 +520,10 @@ public class PlaneBookingSystemGUI extends JFrame {
     private CardLayout cardLayout = new CardLayout();
     private JPanel mainPanel = new JPanel(cardLayout);
 
-    // --- Components for Main Menu / Role Selection ---
+    //  Components for Main Menu
     private JPanel roleSelectionPanel;
 
-    // --- Components for User Portal ---
+    // Components for User Portal
     private JPanel userPanel;
     private JTextField userNameField, userEmailField, userPhoneField;
     private JTable flightTable;
@@ -535,7 +534,15 @@ public class PlaneBookingSystemGUI extends JFrame {
     private SeatTableCellRenderer seatMapRenderer;
     private JTextField selectedSeatField;
 
-    // --- Dependencies ---
+    // Components for Admin Portal
+    private JPanel adminPanel;
+    private DefaultTableModel airlineTableModel, airportTableModel, planeTableModel, adminFlightTableModel;
+    private JTable airlineTable, airportTable, planeTable, adminFlightTable;
+    private List<Airline> airlines = new ArrayList<>();
+    private List<Airport> airports = new ArrayList<>();
+    private List<Plane> planes = new ArrayList<>();
+
+    //  Dependencies 
     private InputReader inputReader;
     private FlightManager flightManager;
     private DefaultPaymentService paymentService;
@@ -562,15 +569,14 @@ public class PlaneBookingSystemGUI extends JFrame {
 
     private void setupUI() {
         setupRoleSelectionPanel();
-        setupUserPanel(); // Only user panel now
+        setupUserPanel();
+        setupAdminPanel(); // <-- Add this line
 
         mainPanel.add(roleSelectionPanel, "ROLE_SELECTION");
         mainPanel.add(userPanel, "USER_PORTAL");
+        mainPanel.add(adminPanel, "ADMIN_PORTAL"); // <-- Add this line
 
-        // The "System Output" JTextArea and JScrollPane are completely removed.
-        // The mainPanel now takes up the entire center space of the JFrame.
         add(mainPanel, BorderLayout.CENTER);
-
         cardLayout.show(mainPanel, "ROLE_SELECTION");
     }
 
@@ -595,6 +601,14 @@ public class PlaneBookingSystemGUI extends JFrame {
         roleSelectionPanel.add(userButton, gbc);
 
         userButton.addActionListener(e -> cardLayout.show(mainPanel, "USER_PORTAL"));
+
+        JButton adminButton = new JButton("Admin Portal");
+        adminButton.setFont(new Font("Arial", Font.PLAIN, 18));
+        adminButton.setPreferredSize(new Dimension(250, 60));
+        gbc.gridx = 0;
+        gbc.gridy = 2;
+        roleSelectionPanel.add(adminButton, gbc);
+        adminButton.addActionListener(e -> cardLayout.show(mainPanel, "ADMIN_PORTAL"));
     }
 
     private void setupUserPanel() {
@@ -715,6 +729,101 @@ public class PlaneBookingSystemGUI extends JFrame {
         userPanel.add(backButtonPanel, BorderLayout.SOUTH);
     }
 
+    private void setupAdminPanel() {
+        adminPanel = new JPanel(new BorderLayout(10, 10));
+        JTabbedPane tabbedPane = new JTabbedPane();
+
+        // Airlines Tab
+        airlineTableModel = new DefaultTableModel(new Object[]{"Code", "Name"}, 0);
+        airlineTable = new JTable(airlineTableModel);
+        JPanel airlinePanel = new JPanel(new BorderLayout());
+        airlinePanel.add(new JScrollPane(airlineTable), BorderLayout.CENTER);
+        JButton addAirlineBtn = new JButton("Add Airline");
+        addAirlineBtn.addActionListener(e -> {
+            String code = JOptionPane.showInputDialog(this, "Enter Airline Code:");
+            String name = JOptionPane.showInputDialog(this, "Enter Airline Name:");
+            if (code != null && name != null) {
+                airlines.add(new Airline(name, code));
+                airlineTableModel.addRow(new Object[]{code, name});
+            }
+        });
+        airlinePanel.add(addAirlineBtn, BorderLayout.SOUTH);
+        tabbedPane.addTab("Airlines", airlinePanel);
+
+        // Airports Tab
+        airportTableModel = new DefaultTableModel(new Object[]{"Code", "Name", "City"}, 0);
+        airportTable = new JTable(airportTableModel);
+        JPanel airportPanel = new JPanel(new BorderLayout());
+        airportPanel.add(new JScrollPane(airportTable), BorderLayout.CENTER);
+        JButton addAirportBtn = new JButton("Add Airport");
+        addAirportBtn.addActionListener(e -> {
+            String code = JOptionPane.showInputDialog(this, "Enter Airport Code:");
+            String name = JOptionPane.showInputDialog(this, "Enter Airport Name:");
+            String city = JOptionPane.showInputDialog(this, "Enter City:");
+            if (code != null && name != null && city != null) {
+                airports.add(new Airport(name, code, city));
+                airportTableModel.addRow(new Object[]{code, name, city});
+            }
+        });
+        airportPanel.add(addAirportBtn, BorderLayout.SOUTH);
+        tabbedPane.addTab("Airports", airportPanel);
+
+        // Planes Tab
+        planeTableModel = new DefaultTableModel(new Object[]{"Registration", "Model", "Capacity"}, 0);
+        planeTable = new JTable(planeTableModel);
+        JPanel planePanel = new JPanel(new BorderLayout());
+        planePanel.add(new JScrollPane(planeTable), BorderLayout.CENTER);
+        JButton addPlaneBtn = new JButton("Add Plane");
+        addPlaneBtn.addActionListener(e -> {
+            String reg = JOptionPane.showInputDialog(this, "Enter Registration:");
+            String model = JOptionPane.showInputDialog(this, "Enter Model:");
+            String capStr = JOptionPane.showInputDialog(this, "Enter Capacity:");
+            try {
+                int cap = Integer.parseInt(capStr);
+                if (reg != null && model != null) {
+                    planes.add(new Plane(model, reg, cap));
+                    planeTableModel.addRow(new Object[]{reg, model, cap});
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Invalid capacity.");
+            }
+        });
+        planePanel.add(addPlaneBtn, BorderLayout.SOUTH);
+        tabbedPane.addTab("Planes", planePanel);
+
+        // Flights Tab (Admin)
+        adminFlightTableModel = new DefaultTableModel(new Object[]{"Flight Number", "Departure", "Arrival", "Price"}, 0);
+        adminFlightTable = new JTable(adminFlightTableModel);
+        JPanel flightPanel = new JPanel(new BorderLayout());
+        flightPanel.add(new JScrollPane(adminFlightTable), BorderLayout.CENTER);
+        JButton addFlightBtn = new JButton("Add Flight");
+        addFlightBtn.addActionListener(e -> {
+            String num = JOptionPane.showInputDialog(this, "Enter Flight Number:");
+            String dep = JOptionPane.showInputDialog(this, "Enter Departure:");
+            String arr = JOptionPane.showInputDialog(this, "Enter Arrival:");
+            String priceStr = JOptionPane.showInputDialog(this, "Enter Price:");
+            try {
+                double price = Double.parseDouble(priceStr);
+                if (num != null && dep != null && arr != null) {
+                    Flight f = new Flight(num, dep, arr, price);
+                    ((SimpleFlightManager)flightManager).getAvailableFlights().add(f);
+                    adminFlightTableModel.addRow(new Object[]{num, dep, arr, "Ksh" + String.format("%.2f", price)});
+                    refreshFlightTable();
+                }
+            } catch (Exception ex) {
+                JOptionPane.showMessageDialog(this, "Invalid price.");
+            }
+        });
+        flightPanel.add(addFlightBtn, BorderLayout.SOUTH);
+        tabbedPane.addTab("Flights", flightPanel);
+
+        adminPanel.add(tabbedPane, BorderLayout.CENTER);
+
+        JButton backBtn = new JButton("Back to Role Selection");
+        backBtn.addActionListener(e -> cardLayout.show(mainPanel, "ROLE_SELECTION"));
+        adminPanel.add(backBtn, BorderLayout.SOUTH);
+    }
+
     private void refreshFlightTable() {
         flightTableModel.setRowCount(0);
         for (Flight flight : flightManager.getAvailableFlights()) {
@@ -722,7 +831,7 @@ public class PlaneBookingSystemGUI extends JFrame {
                     flight.getFlightNumber(),
                     flight.getDepartureLocation(),
                     flight.getArrivalLocation(),
-                    String.format("$%.2f", flight.getPrice())
+                   "Kes"+ String.format("$%.2f", flight.getPrice())
             });
         }
         currentlySelectedFlight = null;
@@ -824,7 +933,7 @@ public class PlaneBookingSystemGUI extends JFrame {
                                 "Booking ID: " + booking.getBookingId() + "\n" +
                                 "Flight: " + currentlySelectedFlight.getFlightNumber() + "\n" +
                                 "Seat: " + seatId + "\n" +
-                                "Price: $" + String.format("%.2f", booking.getTotalPrice()),
+                                "Price: Ksh" + String.format("%.2f", booking.getTotalPrice()),
                                 "Booking Confirmed", JOptionPane.INFORMATION_MESSAGE);
                         updateSeatMap();
                         refreshFlightTable();
@@ -874,4 +983,34 @@ public class PlaneBookingSystemGUI extends JFrame {
             app.setVisible(true);
         });
     }
+}
+
+// --- Data Models for Admin Portal ---
+class Airline {
+    private String name, code;
+    public Airline(String name, String code) { this.name = name; this.code = code; }
+    public String getName() { return name; }
+    public String getCode() { return code; }
+    @Override public String toString() { return code + " - " + name; }
+}
+
+class Airport {
+    private String name, code, city;
+    public Airport(String name, String code, String city) { this.name = name; this.code = code; this.city = city; }
+    public String getName() { return name; }
+    public String getCode() { return code; }
+    public String getCity() { return city; }
+    @Override public String toString() { return code + " - " + name + " (" + city + ")"; }
+}
+
+class Plane {
+    private String model, registration;
+    private int capacity;
+    public Plane(String model, String registration, int capacity) {
+        this.model = model; this.registration = registration; this.capacity = capacity;
+    }
+    public String getModel() { return model; }
+    public String getRegistration() { return registration; }
+    public int getCapacity() { return capacity; }
+    @Override public String toString() { return registration + " - " + model + " (" + capacity + " seats)"; }
 }
