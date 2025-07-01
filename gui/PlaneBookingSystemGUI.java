@@ -4,13 +4,9 @@ import javax.swing.*;
 import javax.swing.table.*;
 
 import model.*;
-import database.DBHelper;
-
 import java.awt.*;
-import java.awt.event.*;
 import java.util.*;
 import java.util.List;
-import java.time.LocalDateTime;
 import javax.swing.table.TableCellRenderer;
 
 public class PlaneBookingSystemGUI extends JFrame {
@@ -60,7 +56,10 @@ public class PlaneBookingSystemGUI extends JFrame {
             setText(value == null ? "" : value.toString());
             String seatId = value == null ? "" : value.toString();
 
-            if (bookedSeats != null && bookedSeats.contains(seatId)) {
+            if (seatId.isEmpty()) { // Aisle
+                setBackground(Color.LIGHT_GRAY);
+                setForeground(Color.LIGHT_GRAY);
+            } else if (bookedSeats != null && bookedSeats.contains(seatId)) {
                 setBackground(Color.RED);
                 setForeground(Color.WHITE);
             } else if (isSelected) {
@@ -150,15 +149,31 @@ public class PlaneBookingSystemGUI extends JFrame {
         }
 
         // Seat map table
-        int numRows = 6;
-        int numCols = 4;
-        String[] seatColumns = {"A", "B", "C", "D"};
-        String[][] seatData = new String[numRows][numCols];
+        //int numRows = 6;
+        //int numCols = 4;
+        //String[] seatColumns = {"A", "B", "C", "D"};
+        //String[][] seatData = new String[numRows][numCols];
 
         // Fill seat numbers (e.g., 1A, 1B, ...)
+        //for (int row = 0; row < numRows; row++) {
+        //    for (int col = 0; col < numCols; col++) {
+        //        seatData[row][col] = (row + 1) + seatColumns[col];
+        //    }
+        //}
+
+        // Seat map table (realistic: 30 rows, 6 seats per row, aisle in the middle)
+        int numRows = 30;
+        String[] seatColumns = {"A", "B", "C", " ", "D", "E", "F"}; // " " is the aisle
+        String[][] seatData = new String[numRows][seatColumns.length];
+
+        // Fill seat numbers (e.g., 1A, 1B, 1C, [aisle], 1D, 1E, 1F)
         for (int row = 0; row < numRows; row++) {
-            for (int col = 0; col < numCols; col++) {
-                seatData[row][col] = (row + 1) + seatColumns[col];
+            for (int col = 0; col < seatColumns.length; col++) {
+                if (seatColumns[col].equals(" ")) {
+                    seatData[row][col] = ""; // Aisle
+                } else {
+                    seatData[row][col] = (row + 1) + seatColumns[col];
+                }
             }
         }
 
@@ -171,10 +186,10 @@ public class PlaneBookingSystemGUI extends JFrame {
         seatMapTable.setCellSelectionEnabled(true);
         seatMapTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
 
-        // Optional: Custom renderer to color booked seats
+        // Custom renderer to color booked seats and show aisle
         seatMapRenderer = new SeatMapCellRenderer();
         seatMapTable.setDefaultRenderer(Object.class, seatMapRenderer);
-        seatMapTable.setRowHeight(30);
+        seatMapTable.setRowHeight(25);
 
         JScrollPane seatScroll = new JScrollPane(seatMapTable);
         userPanel.add(seatScroll, BorderLayout.EAST);
@@ -189,8 +204,9 @@ public class PlaneBookingSystemGUI extends JFrame {
             int row = seatMapTable.getSelectedRow();
             int col = seatMapTable.getSelectedColumn();
             if (!e.getValueIsAdjusting() && row >= 0 && col >= 0) {
-                String seatId = (row + 1) + seatColumns[col];
-                if (bookedSeats == null || !bookedSeats.contains(seatId)) {
+                String seatId = seatData[row][col];
+                // Only allow selection if not aisle and not booked
+                if (!seatColumns[col].equals(" ") && (bookedSeats == null || !bookedSeats.contains(seatId))) {
                     selectedSeatField.setText(seatId);
                 } else {
                     selectedSeatField.setText("");
@@ -206,7 +222,7 @@ public class PlaneBookingSystemGUI extends JFrame {
         bookAndPayButton = new JButton("Book & Pay");
         userPanel.add(bookAndPayButton, BorderLayout.AFTER_LAST_LINE);
 
-        bookAndPayButton.addActionListener(e -> {
+        bookAndPayButton.addActionListener(_ -> {
             if (currentlySelectedFlight == null || selectedSeatField.getText().isEmpty()) {
                 JOptionPane.showMessageDialog(this, "Please select a flight and seat.", "Error", JOptionPane.ERROR_MESSAGE);
                 return;
@@ -214,10 +230,10 @@ public class PlaneBookingSystemGUI extends JFrame {
             PaymentDialog dialog = new PaymentDialog(this, currentlySelectedFlight.getPrice());
             dialog.setVisible(true);
             if (dialog.isPaymentConfirmed()) {
-                String paymentMethod = dialog.getPaymentMethodChoice();
-                String cardNumber = dialog.getCardNumber();
-                String expiry = dialog.getExpiryDate();
-                String cvv = dialog.getCvv();
+                // String paymentMethod = dialog.getPaymentMethodChoice();
+                dialog.getCardNumber();
+                dialog.getExpiryDate();
+                dialog.getCvv();
                 seatMapRenderer.setBookedSeats(bookedSeats);
                 seatMapTable.repaint();
                 // Optionally, mark the seat as booked
@@ -341,14 +357,14 @@ public class PlaneBookingSystemGUI extends JFrame {
         bookingBtnPanel.add(cancelBookingBtn);
         bookingPanel.add(bookingBtnPanel, BorderLayout.SOUTH);
 
-        createBookingBtn.addActionListener(e -> {
+        createBookingBtn.addActionListener(_ -> {
             // Show a dialog to enter booking details (user, flight, seat, etc.)
             // For simplicity, you can use JOptionPane or a custom JDialog
             // On confirmation, create a new Booking and add to the table/database
             JOptionPane.showMessageDialog(this, "Show booking creation dialog here.");
         });
 
-        editBookingBtn.addActionListener(e -> {
+        editBookingBtn.addActionListener(_ -> {
             int selectedRow = bookingTable.getSelectedRow();
             if (selectedRow >= 0) {
                 // Load booking details, show editable dialog, update booking in table/database
@@ -358,7 +374,7 @@ public class PlaneBookingSystemGUI extends JFrame {
             }
         });
 
-        cancelBookingBtn.addActionListener(e -> {
+        cancelBookingBtn.addActionListener(_ -> {
             int selectedRow = bookingTable.getSelectedRow();
             if (selectedRow >= 0) {
                 // Confirm cancellation
@@ -427,13 +443,13 @@ public class PlaneBookingSystemGUI extends JFrame {
             expiryDateField.setEnabled(false);
             cvvField.setEnabled(false);
 
-            cashRadio.addActionListener(e -> {
+            cashRadio.addActionListener(_ -> {
                 paymentMethodChoice = "Cash";
                 cardNumberField.setEnabled(false);
                 expiryDateField.setEnabled(false);
                 cvvField.setEnabled(false);
             });
-            cardRadio.addActionListener(e -> {
+            cardRadio.addActionListener(_ -> {
                 paymentMethodChoice = "Card";
                 cardNumberField.setEnabled(true);
                 expiryDateField.setEnabled(true);
@@ -445,7 +461,7 @@ public class PlaneBookingSystemGUI extends JFrame {
             add(cancelBtn);
             add(payBtn);
 
-            payBtn.addActionListener(e -> {
+            payBtn.addActionListener(_ -> {
                 if (paymentMethodChoice.equals("Card")) {
                     if (cardNumberField.getText().trim().isEmpty() ||
                         expiryDateField.getText().trim().isEmpty() ||
@@ -458,7 +474,7 @@ public class PlaneBookingSystemGUI extends JFrame {
                 dispose();
             });
 
-            cancelBtn.addActionListener(e -> {
+            cancelBtn.addActionListener(_ -> {
                 paymentConfirmed = false;
                 dispose();
             });
