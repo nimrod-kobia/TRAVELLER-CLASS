@@ -1,22 +1,7 @@
-<<<<<<< HEAD:database/DatabaseManager.java
-/*package database;
-import javax.swing.*;
-import javax.swing.table.DefaultTableModel;
+package database;
 
-import model.Flight;
-import model.Visa;
-
-import javax.swing.table.DefaultTableCellRenderer; // Added import
-import javax.swing.SwingConstants; // Added import
-import java.awt.*;
-import java.sql.Date; // Still using java.sql.Date as in your original code
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
-=======
 import java.sql.*;
 import java.util.ArrayList;
->>>>>>> 84782efc4a24f893d9db9f94ddb032b12a422a39:DatabaseManager.java
 import java.util.List;
 
 public class DatabaseManager {
@@ -34,9 +19,12 @@ public class DatabaseManager {
             this.connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
         } catch (ClassNotFoundException | SQLException e) {
             e.printStackTrace();
+            }
+         
+        
+        
+        
         }
-    }
-    
     // Generic method to execute update queries (INSERT, UPDATE, DELETE)
     private int executeUpdate(String query, Object... params) throws SQLException {
         try (PreparedStatement statement = connection.prepareStatement(query)) {
@@ -416,9 +404,8 @@ private boolean isVisaInUse(String visaNumber) throws SQLException {
             e.printStackTrace();
         } finally {
             dbManager.close();
-        }
-    }
- 
+        }}}
+
 
 
 

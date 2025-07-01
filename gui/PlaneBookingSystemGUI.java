@@ -471,12 +471,6 @@ public class PlaneBookingSystemGUI extends JFrame {
         public boolean isPaymentConfirmed() { return paymentConfirmed; }
     }
     public static void main(String[] args) {
-        // Database connection test
-        try (java.sql.Connection conn = database.DBHelper.getConnection()) {
-            System.out.println("Database connection successful!");
-        } catch (Exception ex) {
-            System.out.println("Database connection failed: " + ex.getMessage());
-        }
         SwingUtilities.invokeLater(() -> {
             new PlaneBookingSystemGUI().setVisible(true);
         });
