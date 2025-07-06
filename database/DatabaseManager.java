@@ -7,7 +7,7 @@ import java.util.List;
 public class DatabaseManager {
     private static final String DB_URL = "jdbc:mysql://localhost:3309/traveller_class";
     private static final String DB_USER = "root";
-    private static final String DB_PASSWORD = "12345678";
+    private static final String DB_PASSWORD = "";
     
     private Connection connection;
     

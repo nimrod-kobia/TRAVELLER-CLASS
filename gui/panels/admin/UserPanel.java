@@ -13,7 +13,6 @@ import javax.swing.table.TableColumn;
 import java.awt.*;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Set;
 
 public class UserPanel extends JPanel {
     private JPanel mainPanel;
@@ -55,14 +54,22 @@ public class UserPanel extends JPanel {
         visaNumberField = new JTextField();
         visaCountryField = new JTextField();
         baggageWeightField = new JTextField();
-        userFormPanel.add(new JLabel("Name:"));         userFormPanel.add(userNameField);
-        userFormPanel.add(new JLabel("Email:"));        userFormPanel.add(userEmailField);
-        userFormPanel.add(new JLabel("Phone:"));        userFormPanel.add(userPhoneField);
-        userFormPanel.add(new JLabel("Passport Number:")); userFormPanel.add(passportNumberField);
-        userFormPanel.add(new JLabel("Nationality:"));  userFormPanel.add(nationalityField);
-        userFormPanel.add(new JLabel("Visa Number:"));  userFormPanel.add(visaNumberField);
-        userFormPanel.add(new JLabel("Visa Country:")); userFormPanel.add(visaCountryField);
-        userFormPanel.add(new JLabel("Baggage Weight (kg):")); userFormPanel.add(baggageWeightField);
+        userFormPanel.add(new JLabel("Name:"));      
+           userFormPanel.add(userNameField);
+        userFormPanel.add(new JLabel("Email:"));     
+           userFormPanel.add(userEmailField);
+        userFormPanel.add(new JLabel("Phone:"));     
+           userFormPanel.add(userPhoneField);
+        userFormPanel.add(new JLabel("Passport Number:")); 
+        userFormPanel.add(passportNumberField);
+        userFormPanel.add(new JLabel("Nationality:"));  
+        userFormPanel.add(nationalityField);
+        userFormPanel.add(new JLabel("Visa Number:")); 
+         userFormPanel.add(visaNumberField);
+        userFormPanel.add(new JLabel("Visa Country:"));
+         userFormPanel.add(visaCountryField);
+        userFormPanel.add(new JLabel("Baggage Weight (kg):"));
+         userFormPanel.add(baggageWeightField);
         add(userFormPanel, BorderLayout.NORTH);
     }
 
@@ -78,47 +85,75 @@ public class UserPanel extends JPanel {
         add(new JScrollPane(flightTable), BorderLayout.CENTER);
     }
 
-    private void setupSeatMapPanel() {
-        int numRows = 30;
-        String[] seatColumns = {"A", "B", "C", " ", "D", "E", "F"};
-        String[][] seatData = new String[numRows][seatColumns.length];
+   // Inside gui/panels/UserPanel.java
 
-        for (int row = 0; row < numRows; row++) {
-            for (int col = 0; col < seatColumns.length; col++) {
-                seatData[row][col] = seatColumns[col].equals(" ") ? "" : (row + 1) + seatColumns[col];
-            }
+private void setupSeatMapPanel() {
+    int numRows = 30;
+    String[] seatColumns = {"A", "B", "C", " ", "D", "E", "F"};
+    String[][] seatData = new String[numRows][seatColumns.length];
+
+    for (int row = 0; row < numRows; row++) {
+        for (int col = 0; col < seatColumns.length; col++) {
+            seatData[row][col] = seatColumns[col].equals(" ") ? "" : (row + 1) + seatColumns[col];
         }
-
-        seatMapTableModel = new DefaultTableModel(seatData, seatColumns) {
-            public boolean isCellEditable(int row, int col) { return false; }
-        };
-        seatMapTable = new JTable(seatMapTableModel);
-        seatMapTable.setCellSelectionEnabled(true);
-        seatMapTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-        seatMapRenderer = new SeatMapCellRenderer();
-        seatMapTable.setDefaultRenderer(Object.class, seatMapRenderer);
-        seatMapTable.setRowHeight(25);
-        seatMapTable.getSelectionModel().addListSelectionListener(new SeatSelectionListener(seatData, seatColumns));
-
-        for (int i = 0; i < seatMapTable.getColumnCount(); i++) {
-            TableColumn column = seatMapTable.getColumnModel().getColumn(i);
-            if (seatColumns[i].equals(" ")) { // Aisle column
-                column.setPreferredWidth(20);
-                column.setMinWidth(20);
-                column.setMaxWidth(20);
-            } else {
-                column.setPreferredWidth(40);
-                column.setMinWidth(40);
-                column.setMaxWidth(40); // Fix width for seat columns
-            }
-        }
-        seatMapTable.getTableHeader().setResizingAllowed(false);
-        seatMapTable.getTableHeader().setReorderingAllowed(false);
-
-        add(new JScrollPane(seatMapTable), BorderLayout.EAST);
     }
 
+    seatMapTableModel = new DefaultTableModel(seatData, seatColumns) {
+        public boolean isCellEditable(int row, int col) { return false; }
+    };
+    seatMapTable = new JTable(seatMapTableModel);
+    seatMapTable.setCellSelectionEnabled(true);
+    seatMapTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+    seatMapRenderer = new SeatMapCellRenderer();
+    seatMapTable.setDefaultRenderer(Object.class, seatMapRenderer);
+    seatMapTable.setRowHeight(25);
+    seatMapTable.getSelectionModel().addListSelectionListener(new SeatSelectionListener(seatData, seatColumns));
+
+    // Calculate total preferred width for the seat map table
+    int totalWidth = 0;
+    for (int i = 0; i < seatMapTable.getColumnCount(); i++) {
+        TableColumn column = seatMapTable.getColumnModel().getColumn(i);
+        if (seatColumns[i].equals(" ")) { // Aisle column
+            column.setPreferredWidth(20);
+            column.setMinWidth(20);
+            column.setMaxWidth(20);
+            totalWidth += 20; // Add to total width
+        } else {
+            column.setPreferredWidth(40);
+            column.setMinWidth(40);
+            column.setMaxWidth(40); // Fix width for seat columns
+            totalWidth += 40; // Add to total width
+        }
+    }
+    // Add space for table borders/grid lines and potential scrollbar
+    totalWidth += seatMapTable.getIntercellSpacing().width * (seatMapTable.getColumnCount() - 1); // For intercell spacing
+    totalWidth += seatMapTable.getInsets().left + seatMapTable.getInsets().right; // For table insets
+
+    seatMapTable.getTableHeader().setResizingAllowed(false);
+    seatMapTable.getTableHeader().setReorderingAllowed(false);
+
+    // ********* FIX FOR EXTRA SPACE *********
+    // 1. Tell the table to automatically resize its width to fit columns
+    // This is important when setting fixed column widths.
+    seatMapTable.setAutoResizeMode(JTable.AUTO_RESIZE_OFF);
+
+    // 2. Wrap the JTable in a JScrollPane
+    JScrollPane scrollPane = new JScrollPane(seatMapTable);
+
+    // 3. Explicitly set the preferred width of the JScrollPane
+    // This makes the JScrollPane try to be only as wide as its contained table.
+    // The height can be flexible, but the width should be constrained.
+    Dimension preferredScrollPaneSize = new Dimension(totalWidth + scrollPane.getVerticalScrollBar().getPreferredSize().width + 5, // Add scrollbar width and a little extra padding
+                                                       seatMapTable.getPreferredScrollableViewportSize().height); // Let height be determined by table rows
+    scrollPane.setPreferredSize(preferredScrollPaneSize);
+    scrollPane.setMaximumSize(preferredScrollPaneSize); // Important: Prevent it from growing too wide
+
+    // Adding a border to see the boundaries (optional, for debugging)
+    // scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLUE));
+
+    add(scrollPane, BorderLayout.EAST);
+}
     private void setupControlPanel() {
         JPanel southPanel = new JPanel();
         southPanel.setLayout(new BoxLayout(southPanel, BoxLayout.LINE_AXIS));
@@ -200,11 +235,8 @@ public class UserPanel extends JPanel {
 
     private class SeatSelectionListener implements ListSelectionListener {
         private String[][] seatData;
-        private String[] seatColumns;
-
         public SeatSelectionListener(String[][] seatData, String[] seatColumns) {
             this.seatData = seatData;
-            this.seatColumns = seatColumns;
         }
 
         @Override

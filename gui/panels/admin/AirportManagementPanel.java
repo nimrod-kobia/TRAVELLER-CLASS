@@ -11,10 +11,7 @@ import java.util.List;
 public class AirportManagementPanel extends JPanel {
     private DefaultTableModel airportTableModel;
     private JTable airportTable;
-    private List<Airport> airports;
-
     public AirportManagementPanel(List<Airport> airports) {
-        this.airports = airports;
         setLayout(new BorderLayout());
 
         airportTableModel = new DefaultTableModel(new Object[]{"Code", "Name", "City", "Country", "IATA Code"}, 0);

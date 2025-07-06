@@ -6,18 +6,14 @@ import model.Flight;
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import java.awt.*;
-import java.util.HashSet;
 import java.util.List;
 
 public class FlightManagementPanel extends JPanel {
     private DefaultTableModel adminFlightTableModel;
     private JTable adminFlightTable;
     private List<Flight> flights;
-    private Runnable flightUpdateCallback; // Callback to notify other panels
-
     public FlightManagementPanel(List<Flight> flights, Runnable flightUpdateCallback) {
         this.flights = flights;
-        this.flightUpdateCallback = flightUpdateCallback;
         setLayout(new BorderLayout());
 
         adminFlightTableModel = new DefaultTableModel(new Object[]{"Flight No", "From", "To", "Price"}, 0) {

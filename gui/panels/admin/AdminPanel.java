@@ -1,10 +1,6 @@
 package gui.panels.admin;
 
 
-import gui.panels.admin.AirlineManagementPanel;
-import gui.panels.admin.AirportManagementPanel;
-import gui.panels.admin.BookingManagementPanel;
-import gui.panels.admin.FlightManagementPanel;
 import model.Airline;
 import model.Airport;
 import model.Flight;
@@ -15,9 +11,6 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class AdminPanel extends JPanel {
-    private JPanel mainPanel;
-    private CardLayout cardLayout;
-    private List<Flight> flights; // Reference to shared flights list
     private List<Airline> airlines = new ArrayList<>(); // Admin-specific data
     private List<Airport> airports = new ArrayList<>(); // Admin-specific data
 
@@ -26,10 +19,6 @@ public class AdminPanel extends JPanel {
     private UserPanel userPanel; // We need a way to tell UserPanel to refresh its flight table
 
     public AdminPanel(JPanel mainPanel, CardLayout cardLayout, List<Flight> flights) {
-        this.mainPanel = mainPanel;
-        this.cardLayout = cardLayout;
-        this.flights = flights; // Initialize shared flights data
-
         // To allow AdminPanel to tell UserPanel to refresh its data
         for (Component comp : mainPanel.getComponents()) {
             if (comp instanceof UserPanel) {

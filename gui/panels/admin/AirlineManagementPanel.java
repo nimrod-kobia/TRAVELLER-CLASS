@@ -11,10 +11,7 @@ import java.util.List;
 public class AirlineManagementPanel extends JPanel {
     private DefaultTableModel airlineTableModel;
     private JTable airlineTable;
-    private List<Airline> airlines;
-
     public AirlineManagementPanel(List<Airline> airlines) {
-        this.airlines = airlines;
         setLayout(new BorderLayout());
 
         airlineTableModel = new DefaultTableModel(new Object[]{"Code", "Name"}, 0);

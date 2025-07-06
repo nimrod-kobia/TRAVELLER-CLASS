@@ -43,14 +43,14 @@ public class AirlineDAO {
     public static void main(String[] args) {
         AirlineDAO airlineDAO = new AirlineDAO();
         airlineDAO.addAirline(new Airline("Kenya Airways", "KQ"));
-        // Repeat for other dummy airlines
+       
 
         AirportDAO airportDAO = new AirportDAO();
         airportDAO.addAirport(new Airport("NBO", "Jomo Kenyatta", "Nairobi", "Kenya", "NBO"));
-        // Repeat for other dummy airports
+       
 
         FlightDAO flightDAO = new FlightDAO();
         flightDAO.addFlight(new Flight("KQ101", "Nairobi", "London", 8500));
-        // Repeat for other dummy flights
+        
     }
 }
