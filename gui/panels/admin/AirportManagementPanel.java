@@ -38,7 +38,7 @@ public class AirportManagementPanel extends JPanel {
         form.add(removeBtn);
         add(form, BorderLayout.SOUTH);
 
-        addBtn.addActionListener(_ -> {
+        addBtn.addActionListener(e -> {
             String code = codeField.getText().trim();
             String name = nameField.getText().trim();
             String city = cityField.getText().trim();
@@ -58,7 +58,7 @@ public class AirportManagementPanel extends JPanel {
             }
         });
 
-        removeBtn.addActionListener(_ -> {
+        removeBtn.addActionListener(e-> {
             int selectedRow = airportTable.getSelectedRow();
             if (selectedRow >= 0) {
                 String codeToRemove = (String) airportTableModel.getValueAt(selectedRow, 0);

@@ -25,7 +25,7 @@ public class RoleSelectionPanel extends JPanel {
         gbc.gridx = 1; gbc.gridy = 1;
         add(adminButton, gbc);
 
-        userButton.addActionListener(_ -> cardLayout.show(mainPanel, "USER_PANEL"));
-        adminButton.addActionListener(_ -> cardLayout.show(mainPanel, "ADMIN_PANEL"));
+        userButton.addActionListener(e -> cardLayout.show(mainPanel, "USER_PANEL"));
+        adminButton.addActionListener(e -> cardLayout.show(mainPanel, "ADMIN_PANEL"));
     }
 }

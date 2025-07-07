@@ -3,7 +3,6 @@ import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
 import java.sql.*;
 import database.*;
-
 import java.awt.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -251,16 +250,11 @@ class CardPayment extends AbstractPayment {
 
     @Override
     protected boolean validatePaymentDetails() {
-    if (cardNumber == null || expiryDate == null || cvv == null) return false;
-
-    // Clean spaces just in case
-    cardNumber = cardNumber.replaceAll("[^\\d]", ""); // remove spaces or dashes
-
-    return super.validatePaymentDetails()
-        && cardNumber.matches("\\d{16}")
-        && expiryDate.matches("(0[1-9]|1[0-2])/\\d{2}")
-        && cvv.matches("\\d{3,4}"); // accepts 3 or 4 digits
-}
+        return super.validatePaymentDetails() &&
+                cardNumber != null && Pattern.matches("\\d{16}", cardNumber) &&
+                expiryDate != null && Pattern.matches("\\d{2}/\\d{2}", expiryDate) &&
+                cvv != null && Pattern.matches("\\d{3}", cvv);
+    }
 
     @Override
     public void processPayment(Booking booking, InputReader reader, OutputWriter writer) {
@@ -588,12 +582,12 @@ public class PlaneBookingSystemGUI extends JFrame {
             "Connected to database but connection status is invalid", 
             "Database Warning", JOptionPane.WARNING_MESSAGE);
     }
-    } catch (SQLException e) {
+} catch (SQLException e) {
     JOptionPane.showMessageDialog(this, 
         "Database connection failed: " + e.getMessage(), 
         "Critical Error", JOptionPane.ERROR_MESSAGE);
     System.exit(1);
-    }
+}
         setTitle("Plane Booking System");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -1038,6 +1032,15 @@ public class PlaneBookingSystemGUI extends JFrame {
                         "Cash",
                         new Timestamp(System.currentTimeMillis())
                     );
+            
+            
+            
+            
+            
+            
+            
+            
+           
             
             } else if (paymentDialog.getPaymentMethodChoice().equals("Card")) {
                 String cardNumber = paymentDialog.getCardNumber();

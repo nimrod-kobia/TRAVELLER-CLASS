@@ -169,13 +169,13 @@ private void setupSeatMapPanel() {
         southPanel.add(Box.createHorizontalGlue());
 
         bookAndPayButton = new JButton("Book & Pay");
-        bookAndPayButton.addActionListener(_ -> handleBookAndPay());
+        bookAndPayButton.addActionListener(e -> handleBookAndPay());
         southPanel.add(bookAndPayButton);
 
         southPanel.add(Box.createRigidArea(new Dimension(10, 0)));
 
         JButton userBack = new JButton("Back");
-        userBack.addActionListener(_ -> cardLayout.show(mainPanel, "ROLE_SELECTION"));
+        userBack.addActionListener(e -> cardLayout.show(mainPanel, "ROLE_SELECTION"));
         southPanel.add(userBack);
 
         add(southPanel, BorderLayout.SOUTH);
