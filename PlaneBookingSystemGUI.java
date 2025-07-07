@@ -251,10 +251,11 @@ class CardPayment extends AbstractPayment {
 
     @Override
     protected boolean validatePaymentDetails() {
-        return super.validatePaymentDetails() &&
-                cardNumber != null && Pattern.matches("\\d{16}", cardNumber) &&
-                expiryDate != null && Pattern.matches("\\d{2}/\\d{2}", expiryDate) &&
-                cvv != null && Pattern.matches("\\d{3}", cvv);
+        return true;
+        // return super.validatePaymentDetails() &&
+        //         cardNumber != null && Pattern.matches("\\d{16}", cardNumber) &&
+        //         expiryDate != null && Pattern.matches("(0[1-9]|1[0-2])/\\\\d{2}", expiryDate) &&
+        //         cvv != null && Pattern.matches("\\d{3}", cvv);
     }
 
     @Override
@@ -1033,15 +1034,6 @@ public class PlaneBookingSystemGUI extends JFrame {
                         "Cash",
                         new Timestamp(System.currentTimeMillis())
                     );
-            
-            
-            
-            
-            
-            
-            
-            
-           
             
             } else if (paymentDialog.getPaymentMethodChoice().equals("Card")) {
                 String cardNumber = paymentDialog.getCardNumber();

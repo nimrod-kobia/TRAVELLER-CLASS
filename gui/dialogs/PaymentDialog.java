@@ -42,13 +42,13 @@ public class PaymentDialog extends JDialog {
         expiryDateField.setEnabled(false);
         cvvField.setEnabled(false);
 
-        cashRadio.addActionListener(_ -> {
+        cashRadio.addActionListener(e -> {
             paymentMethodChoice = "Cash";
             cardNumberField.setEnabled(false);
             expiryDateField.setEnabled(false);
             cvvField.setEnabled(false);
         });
-        cardRadio.addActionListener(_ -> {
+        cardRadio.addActionListener(e -> {
             paymentMethodChoice = "Card";
             cardNumberField.setEnabled(true);
             expiryDateField.setEnabled(true);
@@ -60,7 +60,7 @@ public class PaymentDialog extends JDialog {
         add(cancelBtn);
         add(payBtn);
 
-        payBtn.addActionListener(_ -> {
+        payBtn.addActionListener(e -> {
             if (paymentMethodChoice.equals("Card")) {
                 if (cardNumberField.getText().trim().isEmpty() ||
                     expiryDateField.getText().trim().isEmpty() ||
@@ -85,7 +85,7 @@ public class PaymentDialog extends JDialog {
             dispose();
         });
 
-        cancelBtn.addActionListener(_ -> {
+        cancelBtn.addActionListener(e -> {
             paymentConfirmed = false;
             dispose();
         });
