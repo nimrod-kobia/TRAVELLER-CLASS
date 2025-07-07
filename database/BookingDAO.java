@@ -34,15 +34,16 @@ public class BookingDAO {
              Statement st = conn.createStatement();
              ResultSet rs = st.executeQuery(sql)) {
             while (rs.next()) {
-                bookings.add(new Booking(
-                    rs.getInt("booking_id"),
-                    rs.getInt("user_id"),
-                    rs.getInt("flight_id"),
-                    rs.getString("seat_id"),
-                    rs.getTimestamp("booking_time").toLocalDateTime(),
-                    rs.getDouble("total_price"),
-                    rs.getString("booking_status")
-                ));
+                bookings.add(new Booking(null, sql, sql, 0, sql)
+                    // rs.getInt("booking_id"),
+                    // rs.getInt("user_id"),
+                    // rs.getInt("flight_id"),
+                    // rs.getString("seat_id"),
+                    // rs.getTimestamp("booking_time").toLocalDateTime(),
+                    // rs.getDouble("total_price"),
+                    // rs.getString("booking_status")
+                    // rs.getString("Payment_status");
+                );
             }
         } catch (SQLException e) {
             e.printStackTrace();
