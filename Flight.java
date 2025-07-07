@@ -25,4 +25,7 @@ public class Flight {
         System.out.printf("Flight Number: %s | Destination: %s | Price: Ksh %.2f%n",
                           flightNumber, destination, price);
     }
+
+
+    
 }

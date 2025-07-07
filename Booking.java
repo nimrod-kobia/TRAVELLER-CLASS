@@ -51,11 +51,14 @@ public class Booking {
         return bookingStatus;
     }
 
-    public String getPaymentStatus() {
-        return paymentStatus;
-    }
+    
       public void setPaymentStatus(String status) {
         this.paymentStatus = status;
+    }
+
+
+    public String getPaymentStatus() {
+        return paymentStatus;
     }
 
     public void updatePaymentStatus(String status) {

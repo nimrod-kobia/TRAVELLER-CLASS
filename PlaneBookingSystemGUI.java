@@ -1,7 +1,8 @@
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.DefaultTableCellRenderer;
-import javax.swing.SwingConstants;
+import java.sql.*;
+
 import java.awt.*;
 import java.sql.Date;
 import java.time.LocalDateTime;
@@ -93,6 +94,22 @@ class Booking {
         this.seatId = seatId;
         this.totalPrice = flight.getPrice();
         this.bookingTime = LocalDateTime.now();
+    }
+
+    public String getBookingStatus(){
+        return bookingStatus;
+    }
+   public LocalDateTime getBookingTime() {
+        return bookingTime;
+    }
+
+    public String getBookingTimeAsString() {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        return bookingTime.format(formatter);
+    }
+
+    public Timestamp getBookingTimeAsTimestamp() {
+        return Timestamp.valueOf(bookingTime);
     }
 
     public void displayBookingDetails(OutputWriter writer) {
@@ -519,13 +536,14 @@ class PaymentDialog extends JDialog {
 public class PlaneBookingSystemGUI extends JFrame {
     private CardLayout cardLayout = new CardLayout();
     private JPanel mainPanel = new JPanel(cardLayout);
+    private DatabaseManager dbManager;
 
     //  Components for Main Menu
     private JPanel roleSelectionPanel;
 
     // Components for User Portal
     private JPanel userPanel;
-    private JTextField userNameField, userEmailField, userPhoneField;
+    private JTextField userNameField, userEmailField, userPhoneField,userNationalityField,userDOBField,userPassporTextField,userVisaField;
     private JTable flightTable;
     private DefaultTableModel flightTableModel;
     private JButton selectFlightButton, bookSeatButton;
@@ -557,6 +575,19 @@ public class PlaneBookingSystemGUI extends JFrame {
         this.flightManager = flightManager;
         this.paymentService = paymentService;
 
+        try {
+    this.dbManager = new DatabaseManager();
+    if (!dbManager.isConnected()) {
+        JOptionPane.showMessageDialog(this, 
+            "Connected to database but connection status is invalid", 
+            "Database Warning", JOptionPane.WARNING_MESSAGE);
+    }
+    } catch (SQLException e) {
+    JOptionPane.showMessageDialog(this, 
+        "Database connection failed: " + e.getMessage(), 
+        "Critical Error", JOptionPane.ERROR_MESSAGE);
+    System.exit(1);
+    }
         setTitle("Plane Booking System");
         setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -612,20 +643,65 @@ public class PlaneBookingSystemGUI extends JFrame {
     }
 
     private void setupUserPanel() {
-        userPanel = new JPanel(new BorderLayout(10, 10));
+        userPanel = new JPanel(new BorderLayout());
 
-        JPanel userDetailsPanel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 5));
+        JPanel userDetailsPanel = new JPanel(new GridBagLayout());
         userDetailsPanel.setBorder(BorderFactory.createTitledBorder("Passenger Details"));
-        userNameField = new JTextField(15);
-        userEmailField = new JTextField(15);
-        userPhoneField = new JTextField(15);
-        userDetailsPanel.add(new JLabel("Name:"));
-        userDetailsPanel.add(userNameField);
-        userDetailsPanel.add(new JLabel("Email:"));
-        userDetailsPanel.add(userEmailField);
-        userDetailsPanel.add(new JLabel("Phone:"));
-        userDetailsPanel.add(userPhoneField);
-        userPanel.add(userDetailsPanel, BorderLayout.NORTH);
+          GridBagConstraints gbc = new GridBagConstraints();
+    gbc.insets = new Insets(5, 5, 5, 5); // Add some padding
+    gbc.anchor = GridBagConstraints.WEST;
+    gbc.fill = GridBagConstraints.HORIZONTAL;
+
+    // Row 0
+    gbc.gridx = 0; gbc.gridy = 0;
+    userDetailsPanel.add(new JLabel("Name:"), gbc);
+    gbc.gridx = 1;
+    userNameField = new JTextField(20);
+    userDetailsPanel.add(userNameField, gbc);
+
+    // Row 1
+    gbc.gridx = 0; gbc.gridy = 1;
+    userDetailsPanel.add(new JLabel("DOB (yyyy-mm-dd):"), gbc);
+    gbc.gridx = 1;
+    userDOBField = new JTextField(20);
+    userDetailsPanel.add(userDOBField, gbc);
+
+    // Row 2
+    gbc.gridx = 0; gbc.gridy = 2;
+    userDetailsPanel.add(new JLabel("Email:"), gbc);
+    gbc.gridx = 1;
+    userEmailField = new JTextField(20);
+    userDetailsPanel.add(userEmailField, gbc);
+
+    // Row 3
+    gbc.gridx = 0; gbc.gridy = 3;
+    userDetailsPanel.add(new JLabel("Phone:"), gbc);
+    gbc.gridx = 1;
+    userPhoneField = new JTextField(20);
+    userDetailsPanel.add(userPhoneField, gbc);
+
+    // Row 4
+    gbc.gridx = 0; gbc.gridy = 4;
+    userDetailsPanel.add(new JLabel("Nationality:"), gbc);
+    gbc.gridx = 1;
+    userNationalityField = new JTextField(20);
+    userDetailsPanel.add(userNationalityField, gbc);
+
+    // Row 5
+    gbc.gridx = 0; gbc.gridy = 5;
+    userDetailsPanel.add(new JLabel("Passport:"), gbc);
+    gbc.gridx = 1;
+    userPassporTextField = new JTextField(20);
+    userDetailsPanel.add(userPassporTextField, gbc);
+
+    // Row 6
+    gbc.gridx = 0; gbc.gridy = 6;
+    userDetailsPanel.add(new JLabel("Visa:"), gbc);
+    gbc.gridx = 1;
+    userVisaField = new JTextField(20);
+    userDetailsPanel.add(userVisaField, gbc);
+
+    userPanel.add(userDetailsPanel, BorderLayout.NORTH);
 
         JPanel flightSelectionPanel = new JPanel(new BorderLayout());
         flightSelectionPanel.setBorder(BorderFactory.createTitledBorder("Available Flights"));
@@ -909,19 +985,70 @@ public class PlaneBookingSystemGUI extends JFrame {
 
         Booking booking = new Booking(passenger, currentlySelectedFlight, seatId);
 
+         Date dob;
+        try {
+            dob = Date.valueOf(userDOBField.getText());
+        } catch (IllegalArgumentException e) {
+            JOptionPane.showMessageDialog(this, 
+                "Invalid date format. Please use yyyy-MM-dd.", 
+                "Booking Error", JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
         PaymentDialog paymentDialog = new PaymentDialog(this, booking.getTotalPrice());
         paymentDialog.setVisible(true);
 
         if (paymentDialog.isPaymentConfirmed()) {
-            PaymentProcessor processor = null;
-            if (paymentDialog.getPaymentMethodChoice().equals("Cash")) {
-                processor = paymentService.createCashPayment(booking.getTotalPrice());
+            //to save booking to database
+             try {
+                // Save user to database
+                int userId = dbManager.addUser(
+                    userNameField.getText(),
+                    dob,
+                    userNationalityField.getText(),
+                    userPassporTextField.getText().isEmpty()? null :userPassporTextField.getText(),
+                    userVisaField.getText().isEmpty()? null : userVisaField.getText(),
+                    userEmailField.getText()
+                );
+                
+                // Save booking to database
+                int bookingId = dbManager.createBooking(
+                    userId,
+                    currentlySelectedFlight.getFlightNumber(),
+                    seatId,
+                    Timestamp.valueOf(booking.getBookingTime()),
+                    booking.getTotalPrice(),
+                    booking.getBookingStatus(),
+                    booking.getPaymentStatus()
+                );
+                
+                // Process payment
+                PaymentProcessor processor = null;
+                if (paymentDialog.getPaymentMethodChoice().equals("Cash")) {
+                    processor = paymentService.createCashPayment(booking.getTotalPrice());
+                    dbManager.recordPayment(
+                        bookingId,
+                        booking.getTotalPrice(),
+                        "Cash",
+                        new Timestamp(System.currentTimeMillis())
+                    );
+            
+            
+            
+            
+            
+            
+            
+            
+           
+            
             } else if (paymentDialog.getPaymentMethodChoice().equals("Card")) {
                 String cardNumber = paymentDialog.getCardNumber();
                 String expiryDate = paymentDialog.getExpiryDate();
                 String cvv = paymentDialog.getCvv();
                 processor = paymentService.createCardPayment(booking.getTotalPrice(), cardNumber, expiryDate, cvv);
-            }
+            };
+            dbManager.recordPayment(bookingId,booking.getTotalPrice(),"card",new Timestamp(System.currentTimeMillis()));
 
             if (processor != null) {
                 processor.processPayment(booking, inputReader, consoleOutputWriter);
@@ -952,11 +1079,37 @@ public class PlaneBookingSystemGUI extends JFrame {
                 }
             } else {
                 JOptionPane.showMessageDialog(this, "Invalid payment method selected.", "Payment Error", JOptionPane.ERROR_MESSAGE);
+            }}
+            catch (Exception e) {
+                JOptionPane.showMessageDialog(this, "Database error: " + e.getMessage(), 
+                                            "Error", JOptionPane.ERROR_MESSAGE);
+                e.printStackTrace();
             }
         } else {
             consoleOutputWriter.println("Payment cancelled by user for booking ID " + booking.getBookingId());
             JOptionPane.showMessageDialog(this, "Booking cancelled.", "Booking Status", JOptionPane.INFORMATION_MESSAGE);
         }
+    } 
+    
+    
+
+     private List<Flight> loadFlightsFromDatabase() {
+        List<Flight> flights = new ArrayList<>();
+        try {
+            ResultSet rs = dbManager.executeQuery("SELECT * FROM flight");
+            while (rs.next()) {
+                flights.add(new Flight(
+                    rs.getString("flightNumber"),
+                    rs.getString("departureLocation"),
+                    rs.getString("arrivalLocation"),
+                    rs.getDouble("price")
+                ));
+            }
+        } catch (SQLException e) {
+            JOptionPane.showMessageDialog(this, "Failed to load flights: " + e.getMessage(), 
+                                        "Error", JOptionPane.ERROR_MESSAGE);
+        }
+        return flights;
     }
 
     private void addDummyData() {

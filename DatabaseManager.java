@@ -9,16 +9,28 @@ public class DatabaseManager {
     
     private Connection connection;
     
-    public DatabaseManager() {
+    public DatabaseManager() throws SQLException {
         try {
             // Load the MySQL JDBC driver
             Class.forName("com.mysql.cj.jdbc.Driver");
             // Establish connection
             this.connection = DriverManager.getConnection(DB_URL, DB_USER, DB_PASSWORD);
-        } catch (ClassNotFoundException | SQLException e) {
-            e.printStackTrace();
+            System.out.println("Database COnnected Succesfully");
+         } catch (ClassNotFoundException e) {
+            throw new SQLException("MySQL JDBC Driver not found", e);
         }
     }
+    public boolean isConnected() {
+    try {
+        return connection != null && !connection.isClosed();
+    } catch (SQLException e) {
+        return false;
+    }
+}
+
+public Connection getConnection() {
+    return connection;
+}
     
     // Generic method to execute update queries (INSERT, UPDATE, DELETE)
     private int executeUpdate(String query, Object... params) throws SQLException {
@@ -31,7 +43,7 @@ public class DatabaseManager {
     }
     
     // Generic method to execute queries that return a ResultSet
-    private ResultSet executeQuery(String query, Object... params) throws SQLException {
+    public ResultSet executeQuery(String query, Object... params) throws SQLException {
         PreparedStatement statement = connection.prepareStatement(query);
         for (int i = 0; i < params.length; i++) {
             statement.setObject(i + 1, params[i]);
@@ -98,27 +110,42 @@ public int addUser(String fullname, Date dob, String nationality,
         throw new IllegalArgumentException("Email '" + email + "' already exists");
     }
 
-    // Validate passport if provided
     if (passportNumber != null && !passportNumber.trim().isEmpty()) {
-        if (!isPassportExists(passportNumber)) {
-            throw new IllegalArgumentException("Passport '" + passportNumber + "' does not exist in passports table");
-        }
-        if (isPassportInUse(passportNumber)) {
-            throw new IllegalArgumentException("Passport '" + passportNumber + "' is already associated with another user");
-        }
+
+    if (!isPassportExists(passportNumber)) {
+        
+        addPassport(passportNumber, null, null, null);
     }
 
-    // Validate visa if provided
-    if (visaNumber != null && !visaNumber.trim().isEmpty()) {
-        if (!isVisaExists(visaNumber)) {
-            throw new IllegalArgumentException("Visa '" + visaNumber + "' does not exist in visas table");
-        }
-        if (isVisaInUse(visaNumber)) {
-            throw new IllegalArgumentException("Visa '" + visaNumber + "' is already associated with another user");
-        }
+    if (isPassportInUse(passportNumber)) {
+        throw new IllegalArgumentException(
+            "Passport '" + passportNumber + "' is already associated with another user");
+    }
+}
+
+// ── Visa: create on the fly if it is new ───────────────────────
+if (visaNumber != null && !visaNumber.trim().isEmpty()) {
+
+    if (!isVisaExists(visaNumber)) {
+        /*  Same idea: create minimal visa row.
+            visaType / dates / issuingCountry can be NULL now
+            and completed later from your GUI if desired.          */
+        addVisa(visaNumber, null, null, null, null);
     }
 
-    String query = "INSERT INTO users (fullname, dob, nationality, passport_number, visa_number, email) " +
+    if (isVisaInUse(visaNumber)) {
+        throw new IllegalArgumentException(
+            "Visa '" + visaNumber + "' is already associated with another user");
+    }
+}
+
+     
+
+
+
+
+
+    String query = "INSERT IGNORE INTO users (fullname, dob, nationality, passport_number, visa_number, email) " +
                   "VALUES (?, ?, ?, ?, ?, ?)";
 
     try (PreparedStatement statement = connection.prepareStatement(query, Statement.RETURN_GENERATED_KEYS)) {
@@ -379,28 +406,78 @@ private boolean isVisaInUse(String visaNumber) throws SQLException {
  
     public static void main(String[] args) {
         
-    
-        DatabaseManager dbManager = new DatabaseManager();
+        try {
+    Class.forName("com.mysql.cj.jdbc.Driver");
+    System.out.println("MySQL JDBC Driver loaded successfully.");
+} catch (ClassNotFoundException e) {
+    System.err.println("MySQL JDBC Driver NOT FOUND. Add it to your runtime classpath!");
+    e.printStackTrace();
+}
+       
         
         try {
+             DatabaseManager dbManager = new DatabaseManager();
             // 1. Add passport if not exists
             if (!dbManager.isPassportExists("P12345678")) {
-                dbManager.addPassport("P12345675", Date.valueOf("2020-01-15"), 
+                dbManager.addPassport("P123", Date.valueOf("2020-01-15"), 
                                     Date.valueOf("2030-01-15"), "USA");
             }
             
             // 2. Add user
             int userId = dbManager.addUser("John ", Date.valueOf("1985-05-20"), 
-                                         "American", null, null, "john31@example.com");
+                                         "American", null, null, "john0@example.com");
             
             System.out.println("Created user with ID: " + userId);
             
         } catch (Exception e) {
             e.printStackTrace();
-        } finally {
-            dbManager.close();
+        } 
+    }
+
+    // Add these methods to DatabaseManager.java
+public boolean addFlightSeat(String flightNumber, String seatId) throws SQLException {
+    String query = "INSERT INTO flight_seats (flight_number, seat_id, is_booked) VALUES (?, ?, true)";
+    return executeUpdate(query, flightNumber, seatId) > 0;
+}
+
+public boolean isSeatAvailable(String flightNumber, String seatId) throws SQLException {
+    String query = "SELECT COUNT(*) FROM flight_seats WHERE flight_number = ? AND seat_id = ? AND is_booked = false";
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        stmt.setString(1, flightNumber);
+        stmt.setString(2, seatId);
+        try (ResultSet rs = stmt.executeQuery()) {
+            return rs.next() && rs.getInt(1) > 0;
         }
     }
+}
+
+public List<String> getBookedSeats(String flightNumber) throws SQLException {
+    List<String> bookedSeats = new ArrayList<>();
+    String query = "SELECT seat_id FROM flight_seats WHERE flight_number = ? AND is_booked = true";
+    try (PreparedStatement stmt = connection.prepareStatement(query)) {
+        stmt.setString(1, flightNumber);
+        try (ResultSet rs = stmt.executeQuery()) {
+            while (rs.next()) {
+                bookedSeats.add(rs.getString("seat_id"));
+            }
+        }
+    }
+    return bookedSeats;
+}
+
+public ResultSet getAllFlights() throws SQLException {
+    String query = "SELECT * FROM flight";
+    return executeQuery(query);
+}
+
+public boolean addFlightToDatabase(String flightNumber, String departure, String arrival, double price) throws SQLException {
+    String query = "INSERT INTO flight (flightNumber, departureLocation, arrivalLocation, price) VALUES (?, ?, ?, ?)";
+    return executeUpdate(query, flightNumber, departure, arrival, price) > 0;
+}
+
+
+
+
 }
 
  
